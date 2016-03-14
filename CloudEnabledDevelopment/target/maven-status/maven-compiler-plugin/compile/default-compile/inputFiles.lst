@@ -1,0 +1,13 @@
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\objects\Instance.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\repository\InstanceRepository.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\repository\INamedQuery.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\repository\BaseRepository.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\service\CloudDevException.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\repository\impl\BaseJpaRepository.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\service\BaseService.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\objects\CloudEnabledDevelopmentApplication.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\service\InstanceService.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\service\rest\InstanceController.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\objects\TransactionManagerClass.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\service\impl\InstanceServiceImpl.java
+D:\School\295B\CloudEnabledDevelopment\src\main\java\com\DaaS\core\repository\impl\InstanceRepositoryImpl.java
