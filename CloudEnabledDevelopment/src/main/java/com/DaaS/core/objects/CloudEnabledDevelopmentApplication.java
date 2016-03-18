@@ -1,6 +1,8 @@
 package com.DaaS.core.objects;
 
 
+import java.io.IOException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -18,6 +20,18 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.DaaS.core.repository.InstanceRepository;
+import com.DaaS.core.service.rest.InstanceController;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
+import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
+import com.amazonaws.services.ec2.model.CreateKeyPairResult;
+import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
+import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
+import com.amazonaws.services.ec2.model.IpPermission;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
 
 
 /**
@@ -34,9 +48,7 @@ public class CloudEnabledDevelopmentApplication {
 	
 	public static void main(String[] args) {
 		
-        SpringApplication.run(CloudEnabledDevelopmentApplication.class, args);
-
-		
+		SpringApplication.run(CloudEnabledDevelopmentApplication.class, args);
 	}
 	
 	
