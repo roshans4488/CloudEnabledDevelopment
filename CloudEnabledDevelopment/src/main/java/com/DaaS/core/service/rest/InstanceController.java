@@ -228,6 +228,8 @@ public class InstanceController {
 
 	}
 	
+	
+	/*
 	@RequestMapping(value="/runEC2Instance",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -259,7 +261,7 @@ public class InstanceController {
 		return null;
 		
 	}
-	
+	*/
 	
 	
 	
@@ -272,11 +274,29 @@ public class InstanceController {
     public Instance createInstance(@RequestBody @Valid Instance instance) {
      
     	try {
-    		instanceService.save(instance);
+    		
+    		RunInstancesRequest runInstancesRequest =
+  			      new RunInstancesRequest();
+
+  			  runInstancesRequest.withImageId(instance.getImageId())
+  			                     .withInstanceType(instance.getInstanceType())
+  			                     .withMinCount(instance.getMinCount())
+  			                     .withMaxCount(instance.getMaxCount())
+  			                     .withKeyName(instance.getKeyName())
+  			                     .withSecurityGroups(instance.getSecurityGroup());
+  			  
+  			  
+  			  RunInstancesResult runInstancesResult =
+  				      amazonEC2Client.runInstances(runInstancesRequest);
+    		
+  			instanceService.save(instance);
+    		
 		} catch (CloudDevException e) {
 			e.printStackTrace();
 		}
         
+    	
+    	
         return instance;
     }   
 	
