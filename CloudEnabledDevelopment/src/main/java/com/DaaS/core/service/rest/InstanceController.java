@@ -1,5 +1,8 @@
 package com.DaaS.core.service.rest;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.DaaS.core.objects.CloudEnabledDevelopmentApplication;
 import com.DaaS.core.objects.Instance;
+import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
 import com.DaaS.core.service.InstanceService;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
@@ -31,9 +36,16 @@ import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairResult;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.IpPermission;
+import com.amazonaws.services.ec2.model.KeyPair;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 
 /**
  * @author rosha
@@ -57,28 +69,25 @@ public class InstanceController {
     }
 	*/
 	
-	@RequestMapping(value="/authenticateAWSUser",method = RequestMethod.GET,  produces = "application/json")
-    @ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value="/authenticateAWSUser",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String authenticateAWSUser() throws IOException, CloudDevException {
+    public String authenticateAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
         
     	
 		
+		System.out.println("Access Key: "+user.getAccessKey());
+		System.out.println("Secret Key: "+user.getSecretKey());
+		BasicAWSCredentials credentials = new BasicAWSCredentials(user.getAccessKey(), user.getSecretKey());
 		
-		try {
-			credentials = new PropertiesCredentials(
-					CloudEnabledDevelopmentApplication.class.getResourceAsStream("/AwsCredentials.properties"));
-			
-			//Setup Amazon EC2 client
-			amazonEC2Client = new AmazonEC2Client(credentials);
-			amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
-			
-			return "AWS user authenticated successfully.";
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "AWS user authentication failed.";
-		}
+		
+		
+		
+		//Setup Amazon EC2 client
+		amazonEC2Client = new AmazonEC2Client(credentials);
+		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
+		
+		return "AWS user authenticated successfully.";
 		
 		
     	
@@ -136,7 +145,86 @@ public class InstanceController {
 	CreateKeyPairResult createKeyPairResult =
 			  amazonEC2Client.createKeyPair(createKeyPairRequest);
 	
-	return "KeyPair created.";
+	 String privateKey = createKeyPairResult.getKeyPair().getKeyMaterial();
+	 	
+	
+	/*
+	List<Reservation> reservations = amazonEC2Client.describeInstances().getReservations();
+	String publicIP = reservations.get(0).getInstances().get(0).getPublicIpAddress();
+	
+	
+	 String user = "ubuntu";
+     String host = publicIP;
+     int port = 22;
+    
+     
+     KeyPair keypair = createKeyPairResult.getKeyPair();
+     String fingerPrint = keypair.getKeyFingerprint();
+     
+     JSch jsch = new JSch();
+     Session session = null;
+     
+     File file = new File("PrivateKey.txt");
+     
+     if(!file.exists()){
+			file.createNewFile();
+		}
+     FileWriter fileWritter = new FileWriter(file.getName(),true);
+     BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+     bufferWritter.write(privateKey);
+     bufferWritter.close();
+ 
+     
+     
+     try {
+		jsch.addIdentity(file.getCanonicalPath());
+		System.out.println("identity added ");
+	} catch (JSchException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+     
+
+     try {
+		 session = jsch.getSession(user, host, port);
+		 System.out.println("session created.");
+	     
+	     
+	} catch (JSchException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    
+	
+     
+     try {
+		session.connect();
+		System.out.println("session connected.....");
+
+	} catch (JSchException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+     
+     
+     Channel channel = null;
+	try {
+		channel = session.openChannel("shell");
+		channel.setInputStream(System.in);
+	    channel.setOutputStream(System.out);
+	    channel.connect();
+		
+		System.out.println("Channel connected.");
+	} catch (JSchException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+     
+    */
+    
+     
+	return "KeyPair created. Private key: "+privateKey;
 
 	}
 	
@@ -147,8 +235,8 @@ public class InstanceController {
 		
 		
 		
-		createSecurityGroup();
-		createKeyPair();
+		//createSecurityGroup();
+		//createKeyPair();
 		
 		
 		RunInstancesRequest runInstancesRequest =
@@ -164,7 +252,10 @@ public class InstanceController {
 			  
 			  RunInstancesResult runInstancesResult =
 				      amazonEC2Client.runInstances(runInstancesRequest);
-		
+			  
+			  
+		  
+			  
 		return null;
 		
 	}
