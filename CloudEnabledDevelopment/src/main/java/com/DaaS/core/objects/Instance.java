@@ -1,9 +1,12 @@
 package com.DaaS.core.objects;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.TableGenerator;
 
 /**
@@ -22,7 +25,8 @@ public class Instance {
 	      valueColumnName = "seed",
 	      allocationSize=1
 	   )
-	private Long id;
+	private Long instanceId;
+	
 	
 	
 	
@@ -33,18 +37,21 @@ public class Instance {
 	private String keyName;
 	private String securityGroup;
 	
-	
+	@ManyToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="userId")
+	private User user;
 	
 	
 	//getters and setters
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
+	
 	public String getImageId() {
 		return imageId;
+	}
+	public Long getInstanceId() {
+		return instanceId;
+	}
+	public void setInstanceId(Long instanceId) {
+		this.instanceId = instanceId;
 	}
 	public void setImageId(String imageId) {
 		this.imageId = imageId;
@@ -78,5 +85,11 @@ public class Instance {
 	}
 	public void setSecurityGroup(String securityGroup) {
 		this.securityGroup = securityGroup;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

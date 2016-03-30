@@ -27,6 +27,7 @@ import com.DaaS.core.objects.Instance;
 import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
 import com.DaaS.core.service.InstanceService;
+import com.DaaS.core.service.UserService;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
@@ -60,6 +61,8 @@ public class InstanceController {
 	
 	@Autowired
 	private InstanceService instanceService;
+	@Autowired
+	private UserService userService;
 	private AWSCredentials credentials;
 	private AmazonEC2Client amazonEC2Client;
 	/*
@@ -69,13 +72,13 @@ public class InstanceController {
     }
 	*/
 	
-	@RequestMapping(value="/authenticateAWSUser",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+	@RequestMapping(value="/authenticateAWSUser/{user_id}",method = RequestMethod.GET,consumes = "application/json",  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String authenticateAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
+    public String authenticateAWSUser(@PathVariable("user_id") long user_id) throws IOException, CloudDevException {
         
     	
-		
+		User user = userService.getUserById(user_id);
 		System.out.println("Access Key: "+user.getAccessKey());
 		System.out.println("Secret Key: "+user.getSecretKey());
 		BasicAWSCredentials credentials = new BasicAWSCredentials(user.getAccessKey(), user.getSecretKey());
@@ -289,6 +292,8 @@ public class InstanceController {
   			  RunInstancesResult runInstancesResult =
   				      amazonEC2Client.runInstances(runInstancesRequest);
     		
+  			  
+  			  
   			instanceService.save(instance);
     		
 		} catch (CloudDevException e) {
