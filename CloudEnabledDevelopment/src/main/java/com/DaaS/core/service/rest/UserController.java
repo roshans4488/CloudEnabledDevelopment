@@ -57,10 +57,10 @@ public class UserController {
 	private AWSCredentials credentials;
 	private AmazonEC2Client amazonEC2Client;
 	
-	@RequestMapping(value="/authenticateAWSUser",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
+	@RequestMapping(value="/createAWSUser",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String authenticateAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
+    public String createAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
         
     	
 		
@@ -75,6 +75,18 @@ public class UserController {
 		amazonEC2Client = new AmazonEC2Client(credentials);
 		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
 		
+		
+		CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
+		createKeyPairRequest.withKeyName(user.getName());  //Keypair created with user name
+		CreateKeyPairResult createKeyPairResult =
+				  amazonEC2Client.createKeyPair(createKeyPairRequest);
+		
+		 String privateKey = createKeyPairResult.getKeyPair().getKeyMaterial();
+		
+		user.setPrivateKey(privateKey);
+		
+		
+		userService.save(user);
 		return "AWS user authenticated successfully.";
 		
 		

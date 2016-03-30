@@ -337,6 +337,7 @@ public class InstanceController {
     @RequestMapping(value = "/deleteInstance/{instance_id}",method = RequestMethod.DELETE, produces = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ResponseBody
+  
     public void deleteInstance(@PathVariable("instance_id") Long instance_id)  {
     	
     	try {
