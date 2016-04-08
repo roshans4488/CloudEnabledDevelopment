@@ -2,12 +2,21 @@ package com.DaaS.core.service.rest;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -47,6 +56,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
 
 /**
  * @author rosha
@@ -380,6 +390,112 @@ public class InstanceController {
     	return result;
     	
     	
+    }
+
+	@ResponseStatus(value = HttpStatus.CREATED)
+	@RequestMapping(value="/save", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
+    public @ResponseBody JSONObject saveProject(@RequestBody JSONObject obj) {
+    	
+    	
+		@SuppressWarnings("deprecation")
+		HttpClient client = new DefaultHttpClient();
+		
+		// write code to get the docker containers IP address
+		
+		String IPAddress = "";
+		
+		String url = "http://" + IPAddress + ":8080/save";
+		
+        HttpPost post = new HttpPost(url);
+		StringEntity input;
+		HttpResponse response = null;
+		
+		try {
+			input = new StringEntity(obj.toString());
+			input.setContentType("application/json");
+	        post.setEntity(input);
+	        response = client.execute(post);
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        
+    	JSONObject resp_obj = new JSONObject();
+        resp_obj.put("result", response);
+        return resp_obj;
+    }
+	
+	@ResponseStatus(value = HttpStatus.CREATED)
+	@RequestMapping(value="/load", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
+    public @ResponseBody JSONObject loadProject(@RequestBody JSONObject obj) {
+    	
+    	
+		@SuppressWarnings("deprecation")
+		HttpClient client = new DefaultHttpClient();
+		
+		// write code to get the docker containers IP address
+		
+		String IPAddress = "";
+		
+		String url = "http://" + IPAddress + ":8080/load";
+		
+        HttpPost post = new HttpPost(url);
+		StringEntity input;
+		HttpResponse response = null;
+		
+		try {
+			input = new StringEntity(obj.toString());
+			input.setContentType("application/json");
+	        post.setEntity(input);
+	        response = client.execute(post);
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        
+    	JSONObject resp_obj = new JSONObject();
+        resp_obj.put("result", response);
+        return resp_obj;
+    }
+	
+	
+	@ResponseStatus(value = HttpStatus.CREATED)
+	@RequestMapping(value="/compile", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
+    public @ResponseBody JSONObject compileProject(@RequestBody JSONObject obj) {
+    	
+    	
+		@SuppressWarnings("deprecation")
+		HttpClient client = new DefaultHttpClient();
+		
+		// write code to get the docker containers IP address and Project Name
+		
+		String IPAddress = "";
+		
+		String url = "http://" + IPAddress + ":8080/compile";
+		
+        HttpPost post = new HttpPost(url);
+		StringEntity input;
+		HttpResponse response = null;
+		
+		try {
+			input = new StringEntity(obj.toString());
+			input.setContentType("application/json");
+	        post.setEntity(input);
+	        response = client.execute(post);
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        
+    	JSONObject resp_obj = new JSONObject();
+        resp_obj.put("result", response);
+        return resp_obj;
     }
     
 }
