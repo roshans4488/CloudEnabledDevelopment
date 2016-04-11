@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -46,13 +47,16 @@ import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairResult;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.IpPermission;
 import com.amazonaws.services.ec2.model.KeyPair;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.util.EC2MetadataUtils;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -115,28 +119,35 @@ public class InstanceController {
     public String createSecurityGroup() throws IOException, CloudDevException {
 		
 		CreateSecurityGroupRequest csgr = new CreateSecurityGroupRequest();
-		csgr.withGroupName("JavaSecurityGroup").withDescription("Java security group");
+		csgr.withGroupName("CloudDevSecurityGroup").withDescription("Cloud Dev security group");
 		
 		
 		CreateSecurityGroupResult createSecurityGroupResult =
 			    amazonEC2Client.createSecurityGroup(csgr);
 		
 		
-		IpPermission ipPermission =
+		IpPermission ipPermission1 =
 			    new IpPermission();
 
-			ipPermission.withIpRanges("111.111.111.111/32", "150.150.150.150/32")
+			ipPermission1.withIpRanges("0.0.0.0/32")
 			            .withIpProtocol("tcp")
 			            .withFromPort(22)
 			            .withToPort(22);
 			
-			
+			IpPermission ipPermission2 =
+				    new IpPermission();
+
+				ipPermission2.withIpRanges("0.0.0.0/0")
+				            .withIpProtocol("icmp")
+							.withFromPort(8)  //The from_port is the ICMP type number and the to_port is the ICMP code
+							.withToPort(0);
+				            
 			
 			AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest =
 				    new AuthorizeSecurityGroupIngressRequest();
 
-				authorizeSecurityGroupIngressRequest.withGroupName("JavaSecurityGroup")
-				                                    .withIpPermissions(ipPermission);
+				authorizeSecurityGroupIngressRequest.withGroupName("CloudDevSecurityGroup")
+				                                    .withIpPermissions(ipPermission1,ipPermission2);
 		
 				
 		amazonEC2Client.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
@@ -148,96 +159,59 @@ public class InstanceController {
 	
 	
 	
-	@RequestMapping(value="/createKeyPair",method = RequestMethod.GET,  produces = "application/json")
+	@RequestMapping(value="/connectToEC2Instance",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String createKeyPair() throws IOException, CloudDevException {
+    public String connectToEC2Instance() throws IOException, CloudDevException {
 	
-	CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
-	createKeyPairRequest.withKeyName("295");
-	CreateKeyPairResult createKeyPairResult =
-			  amazonEC2Client.createKeyPair(createKeyPairRequest);
+			
+	//List<Reservation> reservations = amazonEC2Client.describeInstances().getReservations();
+	//String publicIP = "52.10.147.50"; //reservations.get(0).getInstances().get(0).getPublicIpAddress();
 	
-	 String privateKey = createKeyPairResult.getKeyPair().getKeyMaterial();
-	 	
 	
-	/*
-	List<Reservation> reservations = amazonEC2Client.describeInstances().getReservations();
+	String instanceId = EC2MetadataUtils.getInstanceId();
+   System.out.println("instance_id:"+instanceId);
+	List<Reservation> reservations = amazonEC2Client.describeInstances(new DescribeInstancesRequest()
+	                                                    .withInstanceIds(instanceId))
+	                             .getReservations();
+	                           /*  .stream()
+	                             .map(Reservation::getInstances)
+	                             .flatMap(List::stream)
+	                             .findFirst()
+	                             .map(Instance::getPublicIpAddress)
+	                             .orElse(null);*/
+	
+	
+	
+	System.out.println("Size: "+reservations.size());
+	
 	String publicIP = reservations.get(0).getInstances().get(0).getPublicIpAddress();
 	
 	
-	 String user = "ubuntu";
-     String host = publicIP;
-     int port = 22;
-    
-     
-     KeyPair keypair = createKeyPairResult.getKeyPair();
-     String fingerPrint = keypair.getKeyFingerprint();
-     
-     JSch jsch = new JSch();
-     Session session = null;
-     
-     File file = new File("PrivateKey.txt");
-     
-     if(!file.exists()){
-			file.createNewFile();
-		}
-     FileWriter fileWritter = new FileWriter(file.getName(),true);
-     BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-     bufferWritter.write(privateKey);
-     bufferWritter.close();
- 
-     
-     
-     try {
-		jsch.addIdentity(file.getCanonicalPath());
-		System.out.println("identity added ");
-	} catch (JSchException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-     
-
-     try {
-		 session = jsch.getSession(user, host, port);
-		 System.out.println("session created.");
-	     
-	     
-	} catch (JSchException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-    
+	System.out.println(publicIP);
 	
-     
-     try {
-		session.connect();
-		System.out.println("session connected.....");
-
-	} catch (JSchException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-     
-     
-     Channel channel = null;
-	try {
-		channel = session.openChannel("shell");
-		channel.setInputStream(System.in);
-	    channel.setOutputStream(System.out);
-	    channel.connect();
-		
-		System.out.println("Channel connected.");
-	} catch (JSchException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-
-     
-    */
+	/*
+	String user = "ubuntu";
+    String host = publicIP;
+    int    port = 22;
     
+    
+    String command = "./script.sh"; 
      
-	return "KeyPair created. Private key: "+privateKey;
+    User userObject = userService.getUserById(1L);
+    String privateKey = userObject.getPrivateKey();
+     
+     
+    SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+    sshManager.connect();
+    String response = sshManager.sendCommand(command);
+    System.out.println(response);
+	return response;
+	     
+	     
+	*/
+	
+	return publicIP;
 
 	}
 	
@@ -299,11 +273,16 @@ public class InstanceController {
   			                     .withSecurityGroups(instance.getSecurityGroup());
   			  
   			  
+  			  
   			  RunInstancesResult runInstancesResult =
   				      amazonEC2Client.runInstances(runInstancesRequest);
     		
-  			  
-  			  
+  			
+  			String publicIP = runInstancesResult.getReservation().getInstances().get(0).getPublicIpAddress();
+  			System.out.println(runInstancesResult.getReservation().getInstances().size());
+  			System.out.println("PublicIp: "+publicIP);
+  			
+  		
   			instanceService.save(instance);
     		
 		} catch (CloudDevException e) {
