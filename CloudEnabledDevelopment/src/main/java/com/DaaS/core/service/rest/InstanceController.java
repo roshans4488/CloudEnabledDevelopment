@@ -96,7 +96,7 @@ public class InstanceController {
 	@RequestMapping(value="/authenticateAWSUser/{user_id}",method = RequestMethod.GET,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String authenticateAWSUser(@PathVariable("user_id") long user_id) throws IOException, CloudDevException {
+    public AmazonEC2Client authenticateAWSUser(@PathVariable("user_id") long user_id) throws IOException, CloudDevException {
         
     	
 		User user = userService.getUserById(user_id);
@@ -111,7 +111,7 @@ public class InstanceController {
 		amazonEC2Client = new AmazonEC2Client(credentials);
 		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
 		
-		return "AWS user authenticated successfully.";
+		return amazonEC2Client;
 		
 		
     	
@@ -164,152 +164,106 @@ public class InstanceController {
 	}
 	
 	
-	
-	
-	@RequestMapping(value="/connectToEC2Instance",method = RequestMethod.GET,  produces = "application/json")
+	//                      /connectToEC2Instance/1 
+	@RequestMapping(value="/connectToEC2Instance/{instance_id}",method = RequestMethod.GET,  produces = "application/json")  
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String connectToEC2Instance() throws IOException, CloudDevException {
+    public String connectToEC2Instance(@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
 	
+	Instance instance = instanceService.getInstanceById(instance_id);
 			
-	//List<Reservation> reservations = amazonEC2Client.describeInstances().getReservations();
-	//String publicIP = "52.10.147.50"; //reservations.get(0).getInstances().get(0).getPublicIpAddress();
+	//retrieve public IP of instance
+	String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService) ;     
+	System.out.println(publicIP);
+    
 	
+    //get private key
+    User   userObject = userService.getUserById(instance.getUser().getId());
+    String privateKey = userObject.getPrivateKey();
+    
+    //Execute command on ec2 instance
+    String command = "netstat"; 
+    SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+    sshManager.connect();
+    String response = sshManager.sendCommand(command);
+    System.out.println(response);
+	return response;
+	    
 	
-	String instanceId =   "i-22fdf0e5";//EC2MetadataUtils.getInstanceId();
-   System.out.println("instance_id:"+instanceId);
-	List<Reservation> reservations = amazonEC2Client.describeInstances(new DescribeInstancesRequest()
-	                                                    .withInstanceIds(instanceId))
-	                             .getReservations();
-	
-	
-	System.out.println("Size:"+reservations.size());
-	
-	System.out.println("ip:"+reservations.get(0).getInstances().get(0).getPublicIpAddress());
-	                           /*  .stream()
-	                             .map(Reservation::getInstances)
-	                             .flatMap(List::stream)
-	                             .findFirst()
-	                             .map(Instance::getPublicIpAddress)
-	                             .orElse(null);*/
-	
-return instanceId;
-	
-	
-	//System.out.println("Size: "+publicIP.size());
-	
-//	String publicIP = reservations.get(0).getInstances().get(0).getPublicIpAddress();
-//	
-//	
-//	System.out.println(publicIP);
-//	
-//	
-//	String user = "ubuntu";
-//    String host = publicIP;
-//    int    port = 22;
-//    
-//    
-//    String command = "./script.sh"; 
-//     
-//    User userObject = userService.getUserById(1L);
-//    String privateKey = userObject.getPrivateKey();
-//     
-//     
-//    SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
-//    sshManager.connect();
-//    String response = sshManager.sendCommand(command);
-//    System.out.println(response);
-//	return response;
-	     
-	     
 	//return publicIP;
-	
 
 	}
 	
 	
-	/*
-	@RequestMapping(value="/runEC2Instance",method = RequestMethod.GET,  produces = "application/json")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public String runEC2Instance() throws IOException, CloudDevException {
-		
-		
-		
-		//createSecurityGroup();
-		//createKeyPair();
-		
-		
-		RunInstancesRequest runInstancesRequest =
-			      new RunInstancesRequest();
-
-			  runInstancesRequest.withImageId("ami-9ff7e8af")
-			                     .withInstanceType("t2.micro")
-			                     .withMinCount(1)
-			                     .withMaxCount(1)
-			                     .withKeyName("295")
-			                     .withSecurityGroups("JavaSecurityGroup");
-			  
-			  
-			  RunInstancesResult runInstancesResult =
-				      amazonEC2Client.runInstances(runInstancesRequest);
-			  
-			  
-		  
-			  
-		return null;
-		
-	}
-	*/
-	
-	@RequestMapping(value="/sync",method = RequestMethod.POST, consumes =
+	               //       /sync/2
+	@RequestMapping(value="/sync/{instance_id}",method = RequestMethod.POST, consumes =
     	    "application/json" , produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public JSONObject sync() {
+    public JSONObject sync(@PathVariable("instance_id") Long instance_id) {
      
 		
+		Instance instance = null;
+		try {
+			instance = instanceService.getInstanceById(instance_id);
+		} catch (CloudDevException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		
 		
-		  String pemPath = "/home/pripawar/Priya.pem";
-          String publicIP = "52.26.95.143";
+		
+		//retrieve public IP
+		String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService) ;   
+		
+		
+		//retrieve private key
+		User userObject = null;
+		try {
+			userObject = userService.getUserById(instance.getUser().getId());
+		} catch (CloudDevException e1) {
+			e1.printStackTrace();
+		}
+	    String privateKey = userObject.getPrivateKey();
+		
+	    
+	    
+	    
+	    //create temp user.pem file
+	    String name = userObject.getName();
+	    String pemPath = Yoda.createPrivateKeyFile(privateKey, name);
+			
+			
+		   
+			
+		  //String pemPath = "/home/pripawar/Priya.pem";
+          //String publicIP = "52.26.95.143";
           
+			
+			
+		  //execute rsync command
           String command = "rsync -azvv -e \"ssh -i " + pemPath + "\"" + " src/main/resources/scripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
           System.out.println(command);
-          String output = executeCommand(command);
+          String output = Yoda.executeCommand(command);
           System.out.println(output);
                   
-          String user = "ubuntu";
-          String host = publicIP;
-          int    port = 22;
           
-          
+          //install docker
           String dockerInstall = "/home/ubuntu/scripts/bootstrap.sh"; 
-           
-          User userObject = null;
-		try {
-			userObject = userService.getUserById(1L);
-		} catch (CloudDevException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-          String privateKey = userObject.getPrivateKey();
-           
-           
           SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
           sshManager.connect();
           String response = sshManager.sendCommand(dockerInstall);
           System.out.println(response);
           
+          
+          //build docker image
           String buildDockerImage = "/home/ubuntu/scripts/buildDockerImage.sh";
           String resp_buildImage = sshManager.sendCommand(buildDockerImage);
           System.out.println(resp_buildImage);
           sshManager.close();
       	
-          
-          
-          
+         //send reponse back
          JSONObject obj = new JSONObject();
          obj.put("rsynch_output",output);
          obj.put("bootstrap_output", response);
@@ -356,13 +310,10 @@ return instanceId;
   			//Thread.sleep(60000);
   			  
   			String instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
-  			String publicIP = runInstancesResult.getReservation().getInstances().get(0).getPublicIpAddress();
-  			System.out.println(runInstancesResult.getReservation().getInstances().size());
-  			System.out.println("PublicIp: "+publicIP);
   			
   			
   			System.out.println("InstanceId: "+instanceId);
-            instance.setPublicIp(publicIP);  			
+            instance.setEc2InstanceId(instanceId);		
             instanceService.save(instance);
             
           
@@ -453,32 +404,13 @@ return instanceId;
     	
     }
     
-    //refactor code
     
-    private String executeCommand(String command) {
-
-  		StringBuffer output = new StringBuffer();
-
-  		Process p;
-  		try {
-  			p = Runtime.getRuntime().exec(new String[] { "bash", "-c", command });
-  			p.waitFor();
-  			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-  			
-  			String line = "";			
-  			while ((line = reader.readLine())!= null) {
-  				output.append(line + "\n");
-  			}
-  			
-  			 BufferedReader readErrorProc=new BufferedReader(new InputStreamReader(p.getErrorStream()));
-  		      while(readErrorProc.ready()) {
-  		        String output1 = readErrorProc.readLine();
-  		        System.out.println(output1);
-  		      }
-
-  		} catch (Exception e) {
-  			e.printStackTrace();
-  		}
-  		return output.toString();
-    }
+    
+    
+    
+    
+    
+    
+    
+   
 }

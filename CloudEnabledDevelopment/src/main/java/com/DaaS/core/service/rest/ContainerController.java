@@ -29,6 +29,7 @@ import com.DaaS.core.objects.Container;
 import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
 import com.DaaS.core.service.ContainerService;
+import com.DaaS.core.service.InstanceService;
 import com.DaaS.core.service.UserService;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -54,37 +55,50 @@ public class ContainerController {
 	private UserService userService;
 	
 	
+	@Autowired
+	private InstanceService instanceService;
+	
+	private AmazonEC2Client amazonEC2Client;
+	
 	//create Container
-	@RequestMapping(value="/createContainer",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
+	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String createContainer(@RequestBody @Valid Container container) throws IOException, CloudDevException {
+    public String createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
 		
 		//Rashmi scripts create docker container + deploy agent jar
 		
-		
-		
 		User userObject = null;
 		try {
-			userObject = userService.getUserById(1L);
+			userObject = instanceService.getInstanceById(instance_id).getUser();
 		} catch (CloudDevException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		String publicIP = "52.26.95.143";
+		//Authenticate user
+		BasicAWSCredentials credentials = new BasicAWSCredentials(userObject.getAccessKey(), userObject.getSecretKey());
+		amazonEC2Client = new AmazonEC2Client(credentials);
+		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
+		
+		
+		//get publicIP and private key
+		String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService); //"52.26.95.143";
 		String privateKey = userObject.getPrivateKey();
+		
 		String port = "8000";
         
+		//create container on ec2 instance
         String createContainer = "/home/ubuntu/scripts/createContainer.sh " + port;
-		
         SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
         sshManager.connect();
         String containerID = sshManager.sendCommand(createContainer);
         System.out.println("contaner id is: " + containerID);
         
+        //set containerID 
         container.setDockerID(containerID);
         
+        
+        //copy Agent jar file
         String copyAgentJar = "/home/ubuntu/scripts/copyfile.sh " + containerID;
         String resp_copyAgent = sshManager.sendCommand(copyAgentJar);
         System.out.println("Copy Jar: " + resp_copyAgent);
@@ -97,7 +111,7 @@ public class ContainerController {
 //        String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
 //        System.out.println("Login to the container: " + logIntContainerNExecute);
         
-	
+	    //persist in mongo db
 		containerService.save(container);
 		
 		

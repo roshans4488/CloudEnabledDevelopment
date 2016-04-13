@@ -32,6 +32,8 @@ public class Instance {
 	
 	private String imageId;
 	private String instanceType;
+	private String ec2InstanceId;
+	
 	private int minCount;
 	private int maxCount;
 	private String keyName;
@@ -101,6 +103,13 @@ public class Instance {
 	}
 	public void setPublicIp(String publicIp) {
 		this.publicIp = publicIp;
+	}
+	
+	public String getEc2InstanceId() {
+		return ec2InstanceId;
+	}
+	public void setEc2InstanceId(String ec2InstanceId) {
+		this.ec2InstanceId = ec2InstanceId;
 	}
 	
 }
