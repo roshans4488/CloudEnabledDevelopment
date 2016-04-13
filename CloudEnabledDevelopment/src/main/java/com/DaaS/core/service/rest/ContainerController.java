@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.DaaS.core.objects.Container;
+import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
 import com.DaaS.core.service.ContainerService;
+import com.DaaS.core.service.UserService;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -48,6 +50,9 @@ public class ContainerController {
 	@Autowired
 	private ContainerService containerService;
 	
+	@Autowired
+	private UserService userService;
+	
 	
 	//create Container
 	@RequestMapping(value="/createContainer",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
@@ -55,7 +60,76 @@ public class ContainerController {
     @ResponseBody
     public String createContainer(@RequestBody @Valid Container container) throws IOException, CloudDevException {
 		
+		//Rashmi scripts create docker container + deploy agent jar
+		
+		
+		
+		User userObject = null;
+		try {
+			userObject = userService.getUserById(1L);
+		} catch (CloudDevException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String publicIP = "52.26.95.143";
+		String privateKey = userObject.getPrivateKey();
+		String port = "8000";
+        
+        String createContainer = "/home/ubuntu/scripts/createContainer.sh " + port;
+		
+        SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+        sshManager.connect();
+        String containerID = sshManager.sendCommand(createContainer);
+        System.out.println("contaner id is: " + containerID);
+        
+        container.setDockerID(containerID);
+        
+        String copyAgentJar = "/home/ubuntu/scripts/copyfile.sh " + containerID;
+        String resp_copyAgent = sshManager.sendCommand(copyAgentJar);
+        System.out.println("Copy Jar: " + resp_copyAgent);
+        
+//        String logIntoContainer = "/home/ubuntu/scripts/logIntoContainer.sh " + containerID;
+//        String resp_loginAgent = sshManager.sendCommand(logIntoContainer);
+//        System.out.println("Login to the container: " + resp_loginAgent);
+        
+//        String logIntContainerNExecute = "/home/ubuntu/scripts/executejar.sh " + containerID;
+//        String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
+//        System.out.println("Login to the container: " + logIntContainerNExecute);
+        
+	
 		containerService.save(container);
+		
+		
+		
+//		@SuppressWarnings("deprecation")
+//		HttpClient client = new DefaultHttpClient();
+//		
+//		// write code to get the docker containers IP address
+//		
+//		String IPAddress = "";
+//		
+//		String url = "http://" + IPAddress + ":8080/create";
+//		
+//        HttpPost post = new HttpPost(url);
+//		StringEntity input;
+//		HttpResponse response = null;
+//		
+//		try {
+//			input = new StringEntity(obj.toString());
+//			input.setContentType("application/json");
+//	        post.setEntity(input);
+//	        response = client.execute(post);
+//	        
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//        
+//        
+//    	JSONObject resp_obj = new JSONObject();
+//        resp_obj.put("result", response);
+//        return resp_obj;
 		return "Contianer created successfully.";
 		
     	

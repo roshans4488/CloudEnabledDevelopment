@@ -36,6 +36,8 @@ public class Instance {
 	private int maxCount;
 	private String keyName;
 	private String securityGroup;
+	private String publicIp;
+	
 	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="userId")
@@ -92,4 +94,13 @@ public class Instance {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	
+	
+	public String getPublicIp() {
+		return publicIp;
+	}
+	public void setPublicIp(String publicIp) {
+		this.publicIp = publicIp;
+	}
+	
 }

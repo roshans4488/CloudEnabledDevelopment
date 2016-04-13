@@ -1,5 +1,6 @@
 package com.DaaS.core.service.rest;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -79,6 +81,11 @@ public class InstanceController {
 	private UserService userService;
 	private AWSCredentials credentials;
 	private AmazonEC2Client amazonEC2Client;
+	
+	
+	//52.26.95.143
+	
+	
 	/*
 	@Autowired(required = true)
     public void setInstanceService(InstanceService instanceService) {
@@ -169,11 +176,16 @@ public class InstanceController {
 	//String publicIP = "52.10.147.50"; //reservations.get(0).getInstances().get(0).getPublicIpAddress();
 	
 	
-	String instanceId = EC2MetadataUtils.getInstanceId();
+	String instanceId =   "i-22fdf0e5";//EC2MetadataUtils.getInstanceId();
    System.out.println("instance_id:"+instanceId);
 	List<Reservation> reservations = amazonEC2Client.describeInstances(new DescribeInstancesRequest()
 	                                                    .withInstanceIds(instanceId))
 	                             .getReservations();
+	
+	
+	System.out.println("Size:"+reservations.size());
+	
+	System.out.println("ip:"+reservations.get(0).getInstances().get(0).getPublicIpAddress());
 	                           /*  .stream()
 	                             .map(Reservation::getInstances)
 	                             .flatMap(List::stream)
@@ -181,37 +193,37 @@ public class InstanceController {
 	                             .map(Instance::getPublicIpAddress)
 	                             .orElse(null);*/
 	
+return instanceId;
 	
 	
-	System.out.println("Size: "+reservations.size());
+	//System.out.println("Size: "+publicIP.size());
 	
-	String publicIP = reservations.get(0).getInstances().get(0).getPublicIpAddress();
-	
-	
-	System.out.println(publicIP);
-	
-	/*
-	String user = "ubuntu";
-    String host = publicIP;
-    int    port = 22;
-    
-    
-    String command = "./script.sh"; 
-     
-    User userObject = userService.getUserById(1L);
-    String privateKey = userObject.getPrivateKey();
-     
-     
-    SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
-    sshManager.connect();
-    String response = sshManager.sendCommand(command);
-    System.out.println(response);
-	return response;
+//	String publicIP = reservations.get(0).getInstances().get(0).getPublicIpAddress();
+//	
+//	
+//	System.out.println(publicIP);
+//	
+//	
+//	String user = "ubuntu";
+//    String host = publicIP;
+//    int    port = 22;
+//    
+//    
+//    String command = "./script.sh"; 
+//     
+//    User userObject = userService.getUserById(1L);
+//    String privateKey = userObject.getPrivateKey();
+//     
+//     
+//    SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+//    sshManager.connect();
+//    String response = sshManager.sendCommand(command);
+//    System.out.println(response);
+//	return response;
 	     
 	     
-	*/
+	//return publicIP;
 	
-	return publicIP;
 
 	}
 	
@@ -250,6 +262,69 @@ public class InstanceController {
 	}
 	*/
 	
+	@RequestMapping(value="/sync",method = RequestMethod.POST, consumes =
+    	    "application/json" , produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+
+    public JSONObject sync() {
+     
+		
+		
+		
+		  String pemPath = "/home/pripawar/Priya.pem";
+          String publicIP = "52.26.95.143";
+          
+          String command = "rsync -azvv -e \"ssh -i " + pemPath + "\"" + " src/main/resources/scripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
+          System.out.println(command);
+          String output = executeCommand(command);
+          System.out.println(output);
+                  
+          String user = "ubuntu";
+          String host = publicIP;
+          int    port = 22;
+          
+          
+          String dockerInstall = "/home/ubuntu/scripts/bootstrap.sh"; 
+           
+          User userObject = null;
+		try {
+			userObject = userService.getUserById(1L);
+		} catch (CloudDevException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+          String privateKey = userObject.getPrivateKey();
+           
+           
+          SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+          sshManager.connect();
+          String response = sshManager.sendCommand(dockerInstall);
+          System.out.println(response);
+          
+          String buildDockerImage = "/home/ubuntu/scripts/buildDockerImage.sh";
+          String resp_buildImage = sshManager.sendCommand(buildDockerImage);
+          System.out.println(resp_buildImage);
+          sshManager.close();
+      	
+          
+          
+          
+         JSONObject obj = new JSONObject();
+         obj.put("rsynch_output",output);
+         obj.put("bootstrap_output", response);
+		
+		return obj;
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	//Save Instance
@@ -277,13 +352,20 @@ public class InstanceController {
   			  RunInstancesResult runInstancesResult =
   				      amazonEC2Client.runInstances(runInstancesRequest);
     		
-  			
+  			  
+  			//Thread.sleep(60000);
+  			  
+  			String instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
   			String publicIP = runInstancesResult.getReservation().getInstances().get(0).getPublicIpAddress();
   			System.out.println(runInstancesResult.getReservation().getInstances().size());
   			System.out.println("PublicIp: "+publicIP);
   			
-  		
-  			instanceService.save(instance);
+  			
+  			System.out.println("InstanceId: "+instanceId);
+            instance.setPublicIp(publicIP);  			
+            instanceService.save(instance);
+            
+          
     		
 		} catch (CloudDevException e) {
 			e.printStackTrace();
@@ -369,5 +451,34 @@ public class InstanceController {
     	return result;
     	
     	
+    }
+    
+    //refactor code
+    
+    private String executeCommand(String command) {
+
+  		StringBuffer output = new StringBuffer();
+
+  		Process p;
+  		try {
+  			p = Runtime.getRuntime().exec(new String[] { "bash", "-c", command });
+  			p.waitFor();
+  			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+  			
+  			String line = "";			
+  			while ((line = reader.readLine())!= null) {
+  				output.append(line + "\n");
+  			}
+  			
+  			 BufferedReader readErrorProc=new BufferedReader(new InputStreamReader(p.getErrorStream()));
+  		      while(readErrorProc.ready()) {
+  		        String output1 = readErrorProc.readLine();
+  		        System.out.println(output1);
+  		      }
+
+  		} catch (Exception e) {
+  			e.printStackTrace();
+  		}
+  		return output.toString();
     }
 }

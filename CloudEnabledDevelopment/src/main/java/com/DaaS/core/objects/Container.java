@@ -23,7 +23,7 @@ public class Container {
 	   )
 	private Long projectId;
 	private String projectName;
-	private String dockerName;
+	private String dockerID;
 	private String projectType;
 	private String buildType;
 	private String ipAddress;
@@ -54,12 +54,12 @@ public class Container {
 		this.projectName = projectName;
 	}
 
-	public String getDockerName() {
-		return dockerName;
+	public String getDockerID() {
+		return dockerID;
 	}
 
-	public void setDockerName(String dockerName) {
-		this.dockerName = dockerName;
+	public void setDockerID(String dockerID) {
+		this.dockerID = dockerID;
 	}
 
 	public String getProjectType() {
