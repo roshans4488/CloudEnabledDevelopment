@@ -23,15 +23,8 @@ public class Yoda {
 	
 	
 	//return public ip of EC2 instance
-	static String getPublicIp(Long instance_id, AmazonEC2Client amazonEC2Client, InstanceService instanceService)
+	static String getPublicIp(String ec2InstanceId, AmazonEC2Client amazonEC2Client)
     {
-    Instance instance = null;
-	try {
-		instance = instanceService.getInstanceById(instance_id);
-	} catch (CloudDevException e) {
-		e.printStackTrace();
-	}
-	String ec2InstanceId =  instance.getEc2InstanceId();
 	List<Reservation> reservations = amazonEC2Client.describeInstances(new DescribeInstancesRequest()
 	                                                .withInstanceIds(ec2InstanceId))
 	                             					.getReservations();

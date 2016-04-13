@@ -60,7 +60,7 @@ public class ContainerController {
 	
 	private AmazonEC2Client amazonEC2Client;
 	
-	//create Container
+	//create Container     /createContainer/1  (MongoId of instance)
 	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
@@ -82,7 +82,7 @@ public class ContainerController {
 		
 		
 		//get publicIP and private key
-		String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService); //"52.26.95.143";
+		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); //"52.26.95.143";
 		String privateKey = userObject.getPrivateKey();
 		
 		String port = "8000";

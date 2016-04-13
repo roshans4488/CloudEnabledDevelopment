@@ -173,10 +173,9 @@ public class InstanceController {
 	Instance instance = instanceService.getInstanceById(instance_id);
 			
 	//retrieve public IP of instance
-	String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService) ;     
+	String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;     
 	System.out.println(publicIP);
     
-	
     //get private key
     User   userObject = userService.getUserById(instance.getUser().getId());
     String privateKey = userObject.getPrivateKey();
@@ -188,7 +187,6 @@ public class InstanceController {
     String response = sshManager.sendCommand(command);
     System.out.println(response);
 	return response;
-	    
 	
 	//return publicIP;
 
@@ -215,7 +213,7 @@ public class InstanceController {
 		
 		
 		//retrieve public IP
-		String publicIP = Yoda.getPublicIp(instance_id, amazonEC2Client, instanceService) ;   
+		String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
 		
 		
 		//retrieve private key
