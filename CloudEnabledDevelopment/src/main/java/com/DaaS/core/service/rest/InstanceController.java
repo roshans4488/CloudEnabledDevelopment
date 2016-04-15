@@ -175,7 +175,7 @@ public class InstanceController {
 	//retrieve public IP of instance
 	String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;     
 	System.out.println(publicIP);
-    
+    /*
     //get private key
     User   userObject = userService.getUserById(instance.getUser().getId());
     String privateKey = userObject.getPrivateKey();
@@ -187,8 +187,8 @@ public class InstanceController {
     String response = sshManager.sendCommand(command);
     System.out.println(response);
 	return response;
-	
-	//return publicIP;
+	*/
+	return publicIP;
 
 	}
 	
@@ -231,12 +231,13 @@ public class InstanceController {
 	    //create temp user.pem file
 	    String name = userObject.getName();
 	    String pemPath = Yoda.createPrivateKeyFile(privateKey, name);
-			
-			
-		   
-			
-		  //String pemPath = "/home/pripawar/Priya.pem";
-          //String publicIP = "52.26.95.143";
+	    
+	    String changePerm = "chmod 600 " + pemPath;
+	    System.out.println(pemPath);
+	    System.out.println("Output: " + Yoda.executeCommand(changePerm));
+	    
+		//String pemPath = "/home/pripawar/Priya.pem";
+        //String publicIP = "52.26.95.143";
           
 			
 			
@@ -245,7 +246,11 @@ public class InstanceController {
           System.out.println(command);
           String output = Yoda.executeCommand(command);
           System.out.println(output);
-                  
+          
+          String agentSync = "rsync -azvv -e \"ssh -i " + pemPath + "\"" + " src/main/resources/agentScripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
+          System.out.println(agentSync);
+          output = Yoda.executeCommand(agentSync);
+          System.out.println(output);
           
           //install docker
           String dockerInstall = "/home/ubuntu/scripts/bootstrap.sh"; 

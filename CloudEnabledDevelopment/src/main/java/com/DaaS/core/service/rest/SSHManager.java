@@ -49,7 +49,7 @@ public String connect()
 		   if(!file.exists()){
 					file.createNewFile();
 				}
-		   file.deleteOnExit();
+		  // file.deleteOnExit();
 		   FileWriter fileWritter = new FileWriter(file.getName(),true);
 		   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
 		   bufferWritter.write(privateKey);

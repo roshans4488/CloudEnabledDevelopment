@@ -26,8 +26,10 @@ public class Container {
 	private String dockerID;
 	private String projectType;
 	private String buildType;
-	private String ipAddress;
+	private String ec2ipAddress;
 	
+	
+
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="instanceId")
 	private Instance instance;
@@ -78,13 +80,7 @@ public class Container {
 		this.buildType = buildType;
 	}
 
-	public String getIpAddress() {
-		return ipAddress;
-	}
 
-	public void setIpAddress(String ipAddress) {
-		this.ipAddress = ipAddress;
-	}
 
 	public Instance getInstance() {
 		return instance;
@@ -94,5 +90,13 @@ public class Container {
 		this.instance = instance;
 	}
 	
+	
+	public String getEc2ipAddress() {
+		return ec2ipAddress;
+	}
+
+	public void setEc2ipAddress(String ec2ipAddress) {
+		this.ec2ipAddress = ec2ipAddress;
+	}
 
 }

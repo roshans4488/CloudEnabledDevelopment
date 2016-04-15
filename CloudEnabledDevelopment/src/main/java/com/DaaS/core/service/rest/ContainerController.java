@@ -94,8 +94,9 @@ public class ContainerController {
         String containerID = sshManager.sendCommand(createContainer);
         System.out.println("contaner id is: " + containerID);
         
-        //set containerID 
+        //set containerID and ec2 ip
         container.setDockerID(containerID);
+        container.setEc2ipAddress(publicIP);
         
         
         //copy Agent jar file
@@ -112,6 +113,7 @@ public class ContainerController {
 //        System.out.println("Login to the container: " + logIntContainerNExecute);
         
 	    //persist in mongo db
+        
 		containerService.save(container);
 		
 		
@@ -227,6 +229,42 @@ public class ContainerController {
     	
     }
     
+    @ResponseStatus(value = HttpStatus.CREATED)
+	@RequestMapping(value="/create", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
+    public /*@ResponseBody JSONObject*/String createProject(@RequestBody JSONObject obj) {
+    	
+    	
+		@SuppressWarnings("deprecation")
+		HttpClient client = new DefaultHttpClient();
+		
+		// write code to get the docker containers IP address
+		
+		String IPAddress = "52.25.132.116";
+		
+		String url = "http://" + IPAddress + ":8000/create";
+		
+        HttpPost post = new HttpPost(url);
+		StringEntity input;
+		HttpResponse response = null;
+		
+		try {
+			
+			System.out.println("Executing");
+			input = new StringEntity(obj.toString());
+			input.setContentType("application/json");
+	        post.setEntity(input);
+	        response = client.execute(post);
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        return response.toString();
+    	//JSONObject resp_obj = new JSONObject();
+       // resp_obj.put("result", response);
+       // return resp_obj;
+    }
     
     
 
