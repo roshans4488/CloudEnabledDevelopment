@@ -8,3 +8,4 @@ RUN echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-s
 RUN apt-get install oracle-java8-installer -y
 RUN apt-get install oracle-java8-set-default
 RUN apt-get install maven -y
+RUN apt-get install zip -y

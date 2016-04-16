@@ -9,6 +9,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,7 +232,7 @@ public class ContainerController {
     
     @ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
-    public /*@ResponseBody JSONObject*/String createProject(@RequestBody JSONObject obj) {
+    public JSONObject createProject(@RequestBody JSONObject obj) {
     	
     	
 		@SuppressWarnings("deprecation")
@@ -239,14 +240,14 @@ public class ContainerController {
 		
 		// write code to get the docker containers IP address
 		
-		String IPAddress = "52.25.132.116";
+		String IPAddress = "52.36.111.118";
 		
 		String url = "http://" + IPAddress + ":8000/create";
 		
         HttpPost post = new HttpPost(url);
 		StringEntity input;
 		HttpResponse response = null;
-		
+		String responseString = null;
 		try {
 			
 			System.out.println("Executing");
@@ -254,16 +255,18 @@ public class ContainerController {
 			input.setContentType("application/json");
 	        post.setEntity(input);
 	        response = client.execute(post);
-	        
+	        responseString = new BasicResponseHandler().handleResponse(response);
+	    
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
-        return response.toString();
-    	//JSONObject resp_obj = new JSONObject();
-       // resp_obj.put("result", response);
-       // return resp_obj;
+        
+		JSONObject resp_obj = new JSONObject();
+        resp_obj.put("result", responseString);
+        return resp_obj;
+
     }
     
     
@@ -285,12 +288,15 @@ public class ContainerController {
         HttpPost post = new HttpPost(url);
 		StringEntity input;
 		HttpResponse response = null;
+		String responseString = null;
 		
 		try {
 			input = new StringEntity(obj.toString());
 			input.setContentType("application/json");
 	        post.setEntity(input);
 	        response = client.execute(post);
+	        responseString = new BasicResponseHandler().handleResponse(response);
+	       
 	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -299,7 +305,7 @@ public class ContainerController {
         
         
     	JSONObject resp_obj = new JSONObject();
-        resp_obj.put("result", response);
+        resp_obj.put("result", responseString);
         return resp_obj;
     }
 	
@@ -320,12 +326,14 @@ public class ContainerController {
         HttpPost post = new HttpPost(url);
 		StringEntity input;
 		HttpResponse response = null;
+		String responseString = null;
 		
 		try {
 			input = new StringEntity(obj.toString());
 			input.setContentType("application/json");
 	        post.setEntity(input);
 	        response = client.execute(post);
+	        responseString = new BasicResponseHandler().handleResponse(response);
 	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -334,7 +342,7 @@ public class ContainerController {
         
         
     	JSONObject resp_obj = new JSONObject();
-        resp_obj.put("result", response);
+        resp_obj.put("result", responseString);
         return resp_obj;
     }
 	
@@ -347,21 +355,23 @@ public class ContainerController {
 		@SuppressWarnings("deprecation")
 		HttpClient client = new DefaultHttpClient();
 		
-		// write code to get the docker containers IP address and Project Name
+	    //container id has to be passed as parameter to retrieve IP address and project name
 		
-		String IPAddress = "";
+		String IPAddress = "52.36.111.118";
 		
 		String url = "http://" + IPAddress + ":8080/compile";
 		
         HttpPost post = new HttpPost(url);
 		StringEntity input;
 		HttpResponse response = null;
+		String responseString = null;
 		
 		try {
 			input = new StringEntity(obj.toString());
 			input.setContentType("application/json");
 	        post.setEntity(input);
 	        response = client.execute(post);
+	        responseString = new BasicResponseHandler().handleResponse(response);
 	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -370,7 +380,7 @@ public class ContainerController {
         
         
     	JSONObject resp_obj = new JSONObject();
-        resp_obj.put("result", response);
+        resp_obj.put("result", responseString);
         return resp_obj;
     }
     
