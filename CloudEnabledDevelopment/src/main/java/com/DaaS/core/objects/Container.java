@@ -27,8 +27,12 @@ public class Container {
 	private String projectType;
 	private String buildType;
 	private String ec2ipAddress;
+	private String groupId;
+	private String artifactId;
+	private String version;
+	private String packageName;
 	
-	
+
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="instanceId")
@@ -99,4 +103,37 @@ public class Container {
 		this.ec2ipAddress = ec2ipAddress;
 	}
 
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getArtifactId() {
+		return artifactId;
+	}
+
+	public void setArtifactId(String artifactId) {
+		this.artifactId = artifactId;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+	
 }

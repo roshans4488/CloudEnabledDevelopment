@@ -65,7 +65,7 @@ public class BaseJpaRepository<T,ID> implements BaseRepository<T, ID>, INamedQue
 	@Override
 	public long count() {
 		String queryStr=countQuery();
-		Query query=getEntityManager().createQuery(queryStr);
+		Query query=getEntityManager().createNativeQuery(queryStr);
 		long count=(Long)query.getSingleResult();
 		return count;
 	}

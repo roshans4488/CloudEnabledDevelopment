@@ -39,7 +39,7 @@ public class ContainerRepositoryImpl extends BaseJpaRepository<Container, Long> 
 	
 	@Override
 	public String countQuery() {
-		return "select COUNT(c.id) from Container c";
+		return "db.Container.count({})";
 	}	
 	
 }

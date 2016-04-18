@@ -37,6 +37,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author rosha
@@ -65,9 +66,12 @@ public class ContainerController {
 	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
+    public JSONObject createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
 		
 		//Rashmi scripts create docker container + deploy agent jar
+		
+		ObjectMapper mapper = new ObjectMapper();
+		String jsonInString = mapper.writeValueAsString(container);
 		
 		User userObject = null;
 		try {
@@ -105,49 +109,73 @@ public class ContainerController {
         String resp_copyAgent = sshManager.sendCommand(copyAgentJar);
         System.out.println("Copy Jar: " + resp_copyAgent);
         
+//        //log in to the container
 //        String logIntoContainer = "/home/ubuntu/scripts/logIntoContainer.sh " + containerID;
 //        String resp_loginAgent = sshManager.sendCommand(logIntoContainer);
 //        System.out.println("Login to the container: " + resp_loginAgent);
         
-//        String logIntContainerNExecute = "/home/ubuntu/scripts/executejar.sh " + containerID;
-//        String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
-//        System.out.println("Login to the container: " + logIntContainerNExecute);
+      //execute workspace agent
+        Thread t = new Thread(){
+        	public void run(){
+                String logIntContainerNExecute = "/home/ubuntu/agentScripts/executejar.sh " + containerID;
+                String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
+                System.out.println("Login to the container: " + logIntContainerNExecute);
+                
+        	}
+        };
         
-	    //persist in mongo db
+        t.start();
+       
         
+        JSONObject resp_obj = null;
+        try {
+        	
+        	//wait till the workspace agent is up
+			//t.join();
+		    Thread.sleep(8000);
+			
+			//invoke create project api in container
+			
+			  @SuppressWarnings("deprecation")
+				HttpClient client = new DefaultHttpClient();
+				
+				String url = "http://" + publicIP + ":8000/create";
+		        HttpPost post = new HttpPost(url);
+				StringEntity input;
+				HttpResponse response = null;
+				String responseString = null;
+				try {
+					
+					System.out.println("Executing");
+					input = new StringEntity(jsonInString);
+					input.setContentType("application/json");
+			        post.setEntity(input);
+			        response = client.execute(post);
+			        responseString = new BasicResponseHandler().handleResponse(response);
+			    
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		        
+		       
+				resp_obj = new JSONObject();
+		        resp_obj.put("result", responseString);
+			
+			
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+        
+      
+       
+	    //persist the container object in mongo db
 		containerService.save(container);
 		
+
+		 return resp_obj;
 		
 		
-//		@SuppressWarnings("deprecation")
-//		HttpClient client = new DefaultHttpClient();
-//		
-//		// write code to get the docker containers IP address
-//		
-//		String IPAddress = "";
-//		
-//		String url = "http://" + IPAddress + ":8080/create";
-//		
-//        HttpPost post = new HttpPost(url);
-//		StringEntity input;
-//		HttpResponse response = null;
-//		
-//		try {
-//			input = new StringEntity(obj.toString());
-//			input.setContentType("application/json");
-//	        post.setEntity(input);
-//	        response = client.execute(post);
-//	        
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//        
-//        
-//    	JSONObject resp_obj = new JSONObject();
-//        resp_obj.put("result", response);
-//        return resp_obj;
-		return "Contianer created successfully.";
 		
     	
     }
@@ -230,6 +258,7 @@ public class ContainerController {
     	
     }
     
+    /*
     @ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/create", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
     public JSONObject createProject(@RequestBody JSONObject obj) {
@@ -269,7 +298,7 @@ public class ContainerController {
 
     }
     
-    
+    */
 
 	@ResponseStatus(value = HttpStatus.CREATED)
 	@RequestMapping(value="/save", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
