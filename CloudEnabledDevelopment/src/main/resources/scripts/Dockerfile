@@ -9,3 +9,6 @@ RUN apt-get install oracle-java8-installer -y
 RUN apt-get install oracle-java8-set-default
 RUN apt-get install maven -y
 RUN apt-get install zip -y
+RUN echo "deb http://mirrors.kernel.org/ubuntu/ubuntu wily main universe" | sudo tee -a /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install tree
