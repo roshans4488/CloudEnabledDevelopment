@@ -254,7 +254,7 @@ public class InstanceController {
           
           //install docker
           String dockerInstall = "/home/ubuntu/scripts/bootstrap.sh"; 
-          SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+          SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change
           sshManager.connect();
           String response = sshManager.sendCommand(dockerInstall);
           System.out.println(response);

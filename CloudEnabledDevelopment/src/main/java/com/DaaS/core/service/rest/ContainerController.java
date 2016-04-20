@@ -90,11 +90,17 @@ public class ContainerController {
 		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); //"52.26.95.143";
 		String privateKey = userObject.getPrivateKey();
 		
-		String port = "8000";
+		//configuring port
+		Long basePort = 8000L;
+        Long containerCount = containerService.count(instance_id);
+        basePort+=containerCount;
+        String port = basePort.toString();
         
+        
+		
 		//create container on ec2 instance
         String createContainer = "/home/ubuntu/scripts/createContainer.sh " + port;
-        SSHManager sshManager = new SSHManager("ubuntu",publicIP,privateKey,22);
+        SSHManager sshManager = new SSHManager(userObject.getName(),publicIP,privateKey,22);
         sshManager.connect();
         String containerID = sshManager.sendCommand(createContainer);
         System.out.println("contaner id is: " + containerID);
@@ -102,6 +108,7 @@ public class ContainerController {
         //set containerID and ec2 ip
         container.setDockerID(containerID);
         container.setEc2ipAddress(publicIP);
+        container.setPort(port);
         
         
         //copy Agent jar file
@@ -139,7 +146,10 @@ public class ContainerController {
 			  @SuppressWarnings("deprecation")
 				HttpClient client = new DefaultHttpClient();
 				
-				String url = "http://" + publicIP + ":8000/create";
+				String url = "http://" + publicIP + ":"+port+"/create";
+				
+				System.out.println("Url:"+url);
+				
 		        HttpPost post = new HttpPost(url);
 				StringEntity input;
 				HttpResponse response = null;
@@ -149,6 +159,7 @@ public class ContainerController {
 					System.out.println("Executing");
 					input = new StringEntity(jsonInString);
 					input.setContentType("application/json");
+					System.out.println("Input:"+jsonInString);
 			        post.setEntity(input);
 			        response = client.execute(post);
 			        responseString = new BasicResponseHandler().handleResponse(response);
@@ -245,13 +256,13 @@ public class ContainerController {
     }
     
     //Get count
-    @RequestMapping(value="/getContainerCount",method = RequestMethod.GET,  produces = "application/json")
+    @RequestMapping(value="/getContainerCount/{instance_id}",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Long getContainerCount() throws IOException, CloudDevException {
+    public Long getContainerCount(@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
         
     	
-    	long result = containerService.count();
+    	long result = containerService.count(instance_id);
        
     	return result;
     	

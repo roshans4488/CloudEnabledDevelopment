@@ -48,12 +48,13 @@ public String connect()
 		   
 		   if(!file.exists()){
 					file.createNewFile();
+					 FileWriter fileWritter = new FileWriter(file.getName(),true);
+					   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+					   bufferWritter.write(privateKey);
+					   bufferWritter.close();
 				}
-		  // file.deleteOnExit();
-		   FileWriter fileWritter = new FileWriter(file.getName(),true);
-		   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-		   bufferWritter.write(privateKey);
-		   bufferWritter.close();
+		   file.deleteOnExit();
+		  
 		    
 		} catch (IOException e) {
 		}
@@ -61,7 +62,7 @@ public String connect()
 	   
 	
 	   
-	   
+	   System.out.println("Pem file path:"+file.getCanonicalPath());
 	jsch.addIdentity(file.getCanonicalPath());
 	System.out.println("Identity added.");
 	
@@ -74,7 +75,10 @@ public String connect()
 
    try {
   	 
-	 session = jsch.getSession(user, connectionIP, port);
+	 session = jsch.getSession("ubuntu", connectionIP, port);
+	 //session.setHost(connectionIP);
+	 SshUserInfo userInfo = new SshUserInfo();
+	 session.setUserInfo(userInfo);
 	 session.setConfig("StrictHostKeyChecking", "no");
 	 session.connect(intTimeOut);
 	 System.out.println("session created.");

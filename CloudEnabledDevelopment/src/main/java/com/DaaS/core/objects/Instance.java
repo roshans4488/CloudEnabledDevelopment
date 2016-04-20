@@ -39,6 +39,9 @@ public class Instance {
 	private String keyName;
 	private String securityGroup;
 	private String publicIp;
+	private String workspaceName;
+	private String workspaceType;
+	
 	
 	
 	@ManyToOne(fetch=FetchType.EAGER)
@@ -110,6 +113,19 @@ public class Instance {
 	}
 	public void setEc2InstanceId(String ec2InstanceId) {
 		this.ec2InstanceId = ec2InstanceId;
+	}
+	
+	public String getWorkspaceName() {
+		return workspaceName;
+	}
+	public void setWorkspaceName(String workspaceName) {
+		this.workspaceName = workspaceName;
+	}
+	public String getWorkspaceType() {
+		return workspaceType;
+	}
+	public void setWorkspaceType(String workspaceType) {
+		this.workspaceType = workspaceType;
 	}
 	
 }

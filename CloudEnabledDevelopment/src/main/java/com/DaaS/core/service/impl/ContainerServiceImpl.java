@@ -71,4 +71,9 @@ public class ContainerServiceImpl implements ContainerService{
 		return containerRepository.deleteAll();
 	}
 
+	@Override
+	public Long count(Long instanceId) throws CloudDevException {
+		return containerRepository.count(instanceId);
+	}
+
 }

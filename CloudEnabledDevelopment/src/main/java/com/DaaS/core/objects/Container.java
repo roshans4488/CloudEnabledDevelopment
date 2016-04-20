@@ -31,8 +31,11 @@ public class Container {
 	private String artifactId;
 	private String version;
 	private String packageName;
+	private String port;
 	
 
+
+	
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="instanceId")
@@ -136,4 +139,12 @@ public class Container {
 		this.packageName = packageName;
 	}
 	
+	
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
 }

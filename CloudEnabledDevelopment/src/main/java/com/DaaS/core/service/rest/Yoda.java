@@ -71,12 +71,13 @@ public class Yoda {
 		   
 		   if(!file.exists()){
 					file.createNewFile();
+					file.deleteOnExit();
+					   FileWriter fileWritter = new FileWriter(file.getName(),true);
+					   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+					   bufferWritter.write(privateKey);
+					   bufferWritter.close();
 				}
-		   file.deleteOnExit();
-		   FileWriter fileWritter = new FileWriter(file.getName(),true);
-		   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-		   bufferWritter.write(privateKey);
-		   bufferWritter.close();
+		   
 		    
 		} catch (IOException e) {
 		}

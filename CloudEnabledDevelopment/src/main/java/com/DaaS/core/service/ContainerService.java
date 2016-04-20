@@ -22,6 +22,8 @@ public interface ContainerService extends BaseService{
 	public Container findOne(Long id)throws CloudDevException;
 
 	public Long count()throws CloudDevException;
+	
+	public Long count(Long instanceId)throws CloudDevException;
 
 	public int deleteAll();
 	

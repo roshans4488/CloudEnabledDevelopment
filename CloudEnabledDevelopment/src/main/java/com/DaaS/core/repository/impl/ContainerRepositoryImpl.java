@@ -2,6 +2,7 @@ package com.DaaS.core.repository.impl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,14 @@ public class ContainerRepositoryImpl extends BaseJpaRepository<Container, Long> 
 	@Override
 	public String countQuery() {
 		return "db.Container.count({})";
+	}
+
+	@Override
+	public Long count(Long instanceId) {
+		String queryStr="db.Container.count({ 'instanceId' : "+instanceId+" })";
+		Query query=getEntityManager().createNativeQuery(queryStr);
+		long count=(Long)query.getSingleResult();
+		return count;
 	}	
 	
 }
