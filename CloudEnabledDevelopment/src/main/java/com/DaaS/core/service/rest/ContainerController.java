@@ -162,8 +162,9 @@ public class ContainerController {
 					System.out.println("Input:"+jsonInString);
 			        post.setEntity(input);
 			        response = client.execute(post);
+			        System.out.println("Response:"+response.getEntity().toString());
 			        responseString = new BasicResponseHandler().handleResponse(response);
-			    
+						    
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

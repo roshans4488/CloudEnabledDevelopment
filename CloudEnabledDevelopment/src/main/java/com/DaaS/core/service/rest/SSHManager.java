@@ -77,8 +77,7 @@ public String connect()
   	 
 	 session = jsch.getSession("ubuntu", connectionIP, port);
 	 //session.setHost(connectionIP);
-	 SshUserInfo userInfo = new SshUserInfo();
-	 session.setUserInfo(userInfo);
+	
 	 session.setConfig("StrictHostKeyChecking", "no");
 	 session.connect(intTimeOut);
 	 System.out.println("session created.");

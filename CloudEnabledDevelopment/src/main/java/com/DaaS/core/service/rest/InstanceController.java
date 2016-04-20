@@ -242,12 +242,12 @@ public class InstanceController {
 			
 			
 		  //execute rsync command
-          String command = "rsync -azvv -e \"ssh -i " + pemPath + "\"" + " src/main/resources/scripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
+          String command = "rsync -azvv -e \"ssh -i " + pemPath + " -o StrictHostKeyChecking=no\"" + " src/main/resources/scripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
           System.out.println(command);
           String output = Yoda.executeCommand(command);
           System.out.println(output);
           
-          String agentSync = "rsync -azvv -e \"ssh -i " + pemPath + "\"" + " src/main/resources/agentScripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
+          String agentSync = "rsync -azvv -e \"ssh -i " + pemPath + " -o StrictHostKeyChecking=no\"" + " src/main/resources/agentScripts" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
           System.out.println(agentSync);
           output = Yoda.executeCommand(agentSync);
           System.out.println(output);
