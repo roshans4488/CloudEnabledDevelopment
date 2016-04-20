@@ -32,4 +32,6 @@ public interface InstanceService extends BaseService {
 	public Long count()throws CloudDevException;
 
 	public int deleteAll();
+
+	public List<Instance> findAllForUser(Long user_id);
 }

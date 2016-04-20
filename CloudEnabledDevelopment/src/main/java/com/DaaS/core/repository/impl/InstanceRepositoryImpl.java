@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,34 @@ public class InstanceRepositoryImpl extends BaseJpaRepository<Instance, Long> im
 	@Override
 	public String countQuery() {
 		return "select COUNT(i.id) from Instance i";
+	}
+
+
+	@Override
+	public List<Instance> findAllForUser(Long user_id) {
+	
+		String queryStr="db.Instance.find({'userId':"+user_id+"})"; //
+		System.out.println(queryStr);
+		Query query=getEntityManager().createNativeQuery(queryStr);
+		
+		
+		
+		
+		
+		List<Instance> entities = query.getResultList();
+		return entities;
+		
+		
+		/*
+		String jpqlQuery = "select i from Instance i where i.user ="+user_id;
+		Query query = getEntityManager().createQuery(jpqlQuery, getEntityClass());
+		//query.setParameter("ids", arg0);
+
+		List<Instance> entities = query.getResultList();
+		return entities;
+		*/
+		
+		
 	}	
 	
 }

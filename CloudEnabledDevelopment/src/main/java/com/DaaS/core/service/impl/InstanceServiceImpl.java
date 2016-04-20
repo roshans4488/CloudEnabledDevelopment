@@ -80,6 +80,11 @@ public class InstanceServiceImpl implements InstanceService{
 		return instanceRepository.deleteAll();
 	}
 
+	@Override
+	public List<Instance> findAllForUser(Long user_id) {
+		return instanceRepository.findAllForUser(user_id);
+	}
+
 	
 
 }
