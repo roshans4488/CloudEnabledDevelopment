@@ -1,6 +1,7 @@
 package com.DaaS.core.service.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -167,7 +168,7 @@ public class ContainerController {
         	
         	//wait till the workspace agent is up
 			//t.join();
-		    Thread.sleep(8000);
+		  //  Thread.sleep(8000);
 			
 			//invoke create project api in container
 			
@@ -182,31 +183,25 @@ public class ContainerController {
 				StringEntity input;
 				HttpResponse response = null;
 				
-				try {
-					
-					System.out.println("Executing");
-					input = new StringEntity(jsonInString);
-					input.setContentType("application/json");
-					System.out.println("Input:"+jsonInString);
-			        post.setEntity(input);
-			        response = client.execute(post);
-			        responseString = new BasicResponseHandler().handleResponse(response);
-						    
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-					
-					Thread.sleep(8000);
-					System.out.println("Retrying");
-					input = new StringEntity(jsonInString);
-					input.setContentType("application/json");
-					System.out.println("Input:"+jsonInString);
-			        post.setEntity(input);
-			        response = client.execute(post);
-			        responseString = new BasicResponseHandler().handleResponse(response);
-					
-				}
-		        
+				int count = 0;
+                int maxTries = 10;
+                while(true) {
+                    try {
+                        Thread.sleep(6000);
+                        System.out.println("Executing");
+                        input = new StringEntity(jsonInString);
+                        input.setContentType("application/json");
+                        System.out.println("Input:"+jsonInString);
+                        post.setEntity(input);
+                        response = client.execute(post);
+                        responseString = new BasicResponseHandler().handleResponse(response);
+                        break;
+                    } catch (Exception e) {
+                    	System.out.println("Retry:"+count);
+                        if (++count == maxTries) throw e;
+                    }
+                }
+                 
 		       
 //				resp_obj = new JSONObject();
 //		        resp_obj.put("result", responseString);
@@ -216,8 +211,44 @@ public class ContainerController {
 			e1.printStackTrace();
 		}
         
+        
+        /*
       
+      
+        Thread t3 = new Thread(){
+        	
+        	
+        	public void run(){
+        		
+        		
+        	@SuppressWarnings("deprecation")
+			HttpClient client = new DefaultHttpClient();	
+        	 JSONObject load_project = new JSONObject();
+             load_project.put("projectName", container.getProjectName());
+             String url = "http://" + publicIP + ":"+agent_port+"/compile";
+             HttpPost post = new HttpPost(url);
+             StringEntity input;
+			try {
+				input = new StringEntity(load_project.toString());
+				 input.setContentType("application/json");
+	             post.setEntity(input);
+	             HttpResponse response_loadProject = client.execute(post);
+	             String responseString_loadProject = new BasicResponseHandler().handleResponse(response_loadProject);
+	             
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
+        	}
+        	
+        	
+        };
+        
+        t3.start();
        
+        
+       */
 	    //persist the container object in mongo db
 		containerService.save(container);
 		
@@ -229,7 +260,26 @@ public class ContainerController {
     	
     }
 	
-	
+	//Find Container
+    @RequestMapping(value="/getURL/{container_id}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getURL(@PathVariable("container_id") Long container_id) {
+       
+    	Container container = null;
+		try {
+			container = containerService.findOne(container_id);
+		} catch (CloudDevException e) {
+			e.printStackTrace();
+		}
+		
+		String host = container.getEc2ipAddress();
+		String port = container.getAgentPort();
+		
+		String url = "http://" + host + ":"+ port;
+
+    	return url;
+    }
 	
 	
 	//Find Container
@@ -426,18 +476,27 @@ public class ContainerController {
 	
 	
 	@ResponseStatus(value = HttpStatus.CREATED)
-	@RequestMapping(value="/compile", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
-    public @ResponseBody JSONObject compileProject(@RequestBody JSONObject obj) {
+	@RequestMapping(value="/compile/{container_id}", method = RequestMethod.POST ,  produces = "application/json", consumes = "application/json")
+    public @ResponseBody JSONObject compileProject(@RequestBody JSONObject obj,@PathVariable("container_id") Long container_id) {
     	
     	
+		Container container = null;
+		try {
+			container = containerService.getContainerById(container_id);
+		} catch (CloudDevException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
+		
 		@SuppressWarnings("deprecation")
 		HttpClient client = new DefaultHttpClient();
 		
 	    //container id has to be passed as parameter to retrieve IP address and project name
 		
-		String IPAddress = "52.36.111.118";
+		String IPAddress = container.getEc2ipAddress();
+		String port = container.getAgentPort();
 		
-		String url = "http://" + IPAddress + ":8080/compile";
+		String url = "http://" + IPAddress + ":"+port+"/compile";
 		
         HttpPost post = new HttpPost(url);
 		StringEntity input;
