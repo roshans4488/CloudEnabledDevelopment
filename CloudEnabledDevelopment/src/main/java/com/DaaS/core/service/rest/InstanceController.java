@@ -83,7 +83,6 @@ public class InstanceController {
 	private AmazonEC2Client amazonEC2Client;
 	
 	
-	//52.26.95.143
 	
 	
 	/*
@@ -118,6 +117,38 @@ public class InstanceController {
     	
     	
     }
+	
+	
+	
+	@RequestMapping(value="/authenticateKeys",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Boolean authenticateKeys(@RequestBody JSONObject o)  {
+        
+    	Boolean isValid = true;
+		BasicAWSCredentials credentials = new BasicAWSCredentials(o.get("accessKey").toString(), o.get("secretKey").toString());
+		
+		
+		//Setup Amazon EC2 client
+		amazonEC2Client = new AmazonEC2Client(credentials);
+		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
+		
+		try{
+			System.out.println(amazonEC2Client.describeAvailabilityZones().toString());
+		}
+		catch(Exception e){
+			isValid = false;
+			e.printStackTrace();
+		}
+		return isValid;
+		
+		
+    	
+    	
+    	
+    }
+	
+	
 	
 	
 	@RequestMapping(value="/createSecurityGroup",method = RequestMethod.GET,  produces = "application/json")

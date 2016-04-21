@@ -25,11 +25,12 @@ public class User {
 	private Long id;
 	
 	
-	
+	private Long userId;
 	private String name;
 	private String accessKey;
 	private String secretKey;
 	private String privateKey;
+	private String accountType;
 	
 	
 	
@@ -71,8 +72,18 @@ public class User {
 	}
 	
 	
+	public String getAccountType() {
+		return accountType;
+	}
+	public void setAccountType(String accountType) {
+		this.accountType = accountType;
+	}
 	
-	
-	
+	public Long getUserId() {
+		return userId;
+	}
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 	
 }

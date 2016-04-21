@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -60,7 +61,7 @@ public class UserController {
 	@RequestMapping(value="/createAWSUser",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String createAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
+    public User createAWSUser(@RequestBody @Valid User user) throws IOException, CloudDevException {
         
     	
 		
@@ -87,7 +88,7 @@ public class UserController {
 		
 		
 		userService.save(user);
-		return "AWS user authenticated successfully.";
+		return user;
 		
 		
     	
@@ -135,6 +136,22 @@ public class UserController {
     }
 	
     
+  //get all accounts by userId
+    @RequestMapping(value="/getAllAccountsByUserId/{user_id}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> getAllAccountsByUserId(@PathVariable("user_id") Long user_id) throws IOException, CloudDevException {
+        
+    	
+    	List<User>  results = userService.findAllAccountsByUserId(user_id);
+       
+    	return results;
+    	
+    	
+    }
+    
+    
+    
     //Delete a user
     @RequestMapping(value = "/deleteUser/{user_id}",method = RequestMethod.DELETE, produces = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -177,5 +194,18 @@ public class UserController {
     	
     	
     }
+    
+    
+    
+    
+    
+	
+    
+    
+    
+    
+    
+    
+    
     
 }
