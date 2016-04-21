@@ -1,0 +1,1 @@
+sudo docker exec $1 /bin/bash -c "cd /ttyUtility ; npm install tty.js ; nohup nodejs index.js > /ttyUtility/ttylog.out &"

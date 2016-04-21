@@ -91,15 +91,25 @@ public class ContainerController {
 		String privateKey = userObject.getPrivateKey();
 		
 		//configuring port
-		Long basePort = 8000L;
+		Long agentPort = 8000L;
         Long containerCount = containerService.count(instance_id);
-        basePort+=containerCount;
-        String port = basePort.toString();
+        agentPort+=containerCount;
+        String agent_port = agentPort.toString();
+        
+        
+        Long ttyPort = 9000L;
+        ttyPort+=containerCount;
+        String tty_port = ttyPort.toString();
+        
+        Long userPort = 7000L;
+        userPort+=containerCount;
+        String user_port = userPort.toString();
+        
         
         
 		
 		//create container on ec2 instance
-        String createContainer = "/home/ubuntu/scripts/createContainer.sh " + port;
+        String createContainer = "/home/ubuntu/scripts/createContainer.sh " + agent_port + " " + tty_port + " " + user_port;
         SSHManager sshManager = new SSHManager(userObject.getName(),publicIP,privateKey,22);
         sshManager.connect();
         String containerID = sshManager.sendCommand(createContainer);
@@ -108,7 +118,9 @@ public class ContainerController {
         //set containerID and ec2 ip
         container.setDockerID(containerID);
         container.setEc2ipAddress(publicIP);
-        container.setPort(port);
+        container.setAgentPort(agent_port);
+        container.setTtyPort(tty_port);
+        container.setUserPort(user_port);
         
         
         //copy Agent jar file
@@ -124,14 +136,30 @@ public class ContainerController {
       //execute workspace agent
         Thread t = new Thread(){
         	public void run(){
+        		System.out.println("Executing agent jar");
                 String logIntContainerNExecute = "/home/ubuntu/agentScripts/executejar.sh " + containerID;
                 String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
-                System.out.println("Login to the container: " + logIntContainerNExecute);
+               
                 
         	}
         };
         
         t.start();
+        
+        Thread t2 = new Thread(){
+        	public void run(){
+        		System.out.println("Executing tty Utility");
+                String logIntContainerNExecute = "/home/ubuntu/agentScripts/execute_tty.sh " + containerID;
+                String resp_loginAgent = sshManager.sendCommand(logIntContainerNExecute);
+                                
+        	}
+        };
+        
+        t2.start();
+        
+        
+        
+        
        
         String responseString = null;
         
@@ -146,7 +174,7 @@ public class ContainerController {
 			  @SuppressWarnings("deprecation")
 				HttpClient client = new DefaultHttpClient();
 				
-				String url = "http://" + publicIP + ":"+port+"/create";
+				String url = "http://" + publicIP + ":"+agent_port+"/create";
 				
 				System.out.println("Url:"+url);
 				
@@ -166,7 +194,17 @@ public class ContainerController {
 						    
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
+					
+					Thread.sleep(8000);
+					System.out.println("Retrying");
+					input = new StringEntity(jsonInString);
+					input.setContentType("application/json");
+					System.out.println("Input:"+jsonInString);
+			        post.setEntity(input);
+			        response = client.execute(post);
+			        responseString = new BasicResponseHandler().handleResponse(response);
+					
 				}
 		        
 		       

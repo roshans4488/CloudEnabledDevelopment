@@ -283,6 +283,12 @@ public class InstanceController {
           output = Yoda.executeCommand(agentSync);
           System.out.println(output);
           
+          
+          String ttySync = "rsync -azvv -e \"ssh -i " + pemPath + " -o StrictHostKeyChecking=no\"" + " src/main/resources/ttyUtility" + " " + "ubuntu@" + publicIP + ":/home/ubuntu";
+          System.out.println(ttySync);
+          output = Yoda.executeCommand(ttySync);
+          System.out.println(output);
+          
           //install docker
           String dockerInstall = "/home/ubuntu/scripts/bootstrap.sh"; 
           SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change

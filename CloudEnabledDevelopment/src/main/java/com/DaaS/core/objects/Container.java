@@ -31,9 +31,13 @@ public class Container {
 	private String artifactId;
 	private String version;
 	private String packageName;
-	private String port;
+	private String agentPort;
+	private String ttyPort;
+	private String userPort;
 	
 
+
+	
 
 	
 
@@ -140,11 +144,27 @@ public class Container {
 	}
 	
 	
-	public String getPort() {
-		return port;
+	public String getAgentPort() {
+		return agentPort;
 	}
 
-	public void setPort(String port) {
-		this.port = port;
+	public void setAgentPort(String agentPort) {
+		this.agentPort = agentPort;
+	}
+
+	public String getTtyPort() {
+		return ttyPort;
+	}
+
+	public void setTtyPort(String ttyPort) {
+		this.ttyPort = ttyPort;
+	}
+
+	public String getUserPort() {
+		return userPort;
+	}
+
+	public void setUserPort(String userPort) {
+		this.userPort = userPort;
 	}
 }

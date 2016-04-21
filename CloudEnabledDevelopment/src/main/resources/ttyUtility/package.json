@@ -1,0 +1,11 @@
+{
+  "name": "ttytest",
+  "version": "1.0.1",
+  "description": "Hardly Rashmi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo"
+  },
+  "author": "",
+  "license": "MIT"
+}
