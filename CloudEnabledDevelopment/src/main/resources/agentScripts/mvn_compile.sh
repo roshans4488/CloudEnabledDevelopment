@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd $1
-mvn compile
+mvn compile > $1_compile.log

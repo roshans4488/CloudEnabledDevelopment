@@ -2,4 +2,4 @@
 
 cd $1
 mvn clean package
-java -jar target/*.jar
+java -jar target/*.jar > $1_execute.log
