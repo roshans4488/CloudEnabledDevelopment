@@ -1,5 +1,7 @@
 package com.DaaS.core.repository.impl;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.DaaS.core.objects.Container;
+import com.DaaS.core.objects.Instance;
 import com.DaaS.core.repository.ContainerRepository;
 
 
@@ -49,6 +52,20 @@ public class ContainerRepositoryImpl extends BaseJpaRepository<Container, Long> 
 		Query query=getEntityManager().createNativeQuery(queryStr);
 		long count=(Long)query.getSingleResult();
 		return count;
+	}
+
+	@Override
+	public List<Container> findAllForInstance(Long instance_id) {
+
+		String queryStr="db.Container.find({'instanceId':"+instance_id+"})"; 
+		System.out.println(queryStr);
+		Query query=getEntityManager().createNativeQuery(queryStr,Container.class);
+		
+		
+		List<Container> entities = (List<Container>) query.getResultList();
+		
+		return entities;
+	
 	}	
 	
 }

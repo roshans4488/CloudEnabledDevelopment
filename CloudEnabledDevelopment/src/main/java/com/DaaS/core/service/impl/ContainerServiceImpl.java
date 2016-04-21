@@ -76,4 +76,9 @@ public class ContainerServiceImpl implements ContainerService{
 		return containerRepository.count(instanceId);
 	}
 
+	@Override
+	public List<Container> findAllForInstance(Long instance_id) {
+		return containerRepository.findAllForInstance(instance_id);
+	}
+
 }

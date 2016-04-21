@@ -356,12 +356,31 @@ public class InstanceController {
         
     	
     	List<Instance>  results = instanceService.findAll();
-       
+    	
     	return results;
     	
     	
     }
 	
+    
+    
+    //get Instances for User
+    @RequestMapping(value="/getInstancesForUser/{user_id}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Instance> getInstancesForUser(@PathVariable("user_id") Long user_id) throws IOException, CloudDevException {
+        
+    	
+    	List<Instance>  results = instanceService.findAllForUser(user_id);
+       
+
+    	return results;
+    	
+    	
+    }
+    
+    
+    
     
     //Delete an instance
     @RequestMapping(value = "/deleteInstance/{instance_id}",method = RequestMethod.DELETE, produces = "application/json")
@@ -407,20 +426,7 @@ public class InstanceController {
     	
     }
     
-    //get Instances for User
-    @RequestMapping(value="/getInstancesForUser/{user_id}",method = RequestMethod.GET,  produces = "application/json")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<Instance> getInstancesForUser(@PathVariable("user_id") Long user_id) throws IOException, CloudDevException {
-        
-    	
-    	List<Instance>  results = instanceService.findAllForUser(user_id);
-       
-    	return results;
-    	
-    	
-    }
-    
+   
     
     
     

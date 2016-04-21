@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.DaaS.core.objects.Container;
+import com.DaaS.core.objects.Instance;
 import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
 import com.DaaS.core.service.ContainerService;
@@ -426,7 +427,20 @@ public class ContainerController {
     
 
     
-    
+	 //get Containers for Instance
+    @RequestMapping(value="/getContainersForInstance/{instance_id}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Container> getContainersForInstance(@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
+        
+    	
+    	List<Container>  results = containerService.findAllForInstance(instance_id);
+       
+
+    	return results;
+    	
+    	
+    }
     
     
     

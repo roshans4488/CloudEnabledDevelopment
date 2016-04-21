@@ -1,5 +1,6 @@
 package com.DaaS.core.repository.impl;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -61,24 +62,16 @@ public class InstanceRepositoryImpl extends BaseJpaRepository<Instance, Long> im
 	
 		String queryStr="db.Instance.find({'userId':"+user_id+"})"; //
 		System.out.println(queryStr);
-		Query query=getEntityManager().createNativeQuery(queryStr);
+		Query query=getEntityManager().createNativeQuery(queryStr,Instance.class);
 		
 		
 		
 		
 		
-		List<Instance> entities = query.getResultList();
+		List<Instance> entities = (List<Instance>) query.getResultList();
+		
 		return entities;
-		
-		
-		/*
-		String jpqlQuery = "select i from Instance i where i.user ="+user_id;
-		Query query = getEntityManager().createQuery(jpqlQuery, getEntityClass());
-		//query.setParameter("ids", arg0);
-
-		List<Instance> entities = query.getResultList();
-		return entities;
-		*/
+	
 		
 		
 	}	
