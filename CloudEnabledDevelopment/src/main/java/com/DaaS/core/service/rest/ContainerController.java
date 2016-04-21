@@ -67,9 +67,8 @@ public class ContainerController {
 	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public JSONObject createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
+    public String createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
 		
-		//Rashmi scripts create docker container + deploy agent jar
 		
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonInString = mapper.writeValueAsString(container);
@@ -134,8 +133,8 @@ public class ContainerController {
         
         t.start();
        
+        String responseString = null;
         
-        JSONObject resp_obj = null;
         try {
         	
         	//wait till the workspace agent is up
@@ -154,7 +153,7 @@ public class ContainerController {
 		        HttpPost post = new HttpPost(url);
 				StringEntity input;
 				HttpResponse response = null;
-				String responseString = null;
+				
 				try {
 					
 					System.out.println("Executing");
@@ -171,8 +170,8 @@ public class ContainerController {
 				}
 		        
 		       
-				resp_obj = new JSONObject();
-		        resp_obj.put("result", responseString);
+//				resp_obj = new JSONObject();
+//		        resp_obj.put("result", responseString);
 			
 			
 		} catch (InterruptedException e1) {
@@ -185,7 +184,7 @@ public class ContainerController {
 		containerService.save(container);
 		
 
-		 return resp_obj;
+		 return responseString;
 		
 		
 		
