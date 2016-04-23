@@ -12,7 +12,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -39,6 +42,9 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateKeyPairRequest;
 import com.amazonaws.services.ec2.model.CreateKeyPairResult;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -68,10 +74,11 @@ public class ContainerController {
 	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public String createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
+    public JSONArray createContainer(@RequestBody @Valid Container container,@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
 		
 		
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		String jsonInString = mapper.writeValueAsString(container);
 		
 		User userObject = null;
@@ -195,16 +202,17 @@ public class ContainerController {
                         post.setEntity(input);
                         response = client.execute(post);
                         responseString = new BasicResponseHandler().handleResponse(response);
+                        System.out.println("Create project json string:" + responseString);
                         break;
                     } catch (Exception e) {
-                    	System.out.println("Retry:"+count);
+                    	
                         if (++count == maxTries) throw e;
+                        System.out.println("Retry:"+count);
                     }
                 }
                  
 		       
-//				resp_obj = new JSONObject();
-//		        resp_obj.put("result", responseString);
+			
 			
 			
 		} catch (InterruptedException e1) {
@@ -212,49 +220,24 @@ public class ContainerController {
 		}
         
         
-        /*
-      
-      
-        Thread t3 = new Thread(){
-        	
-        	
-        	public void run(){
-        		
-        		
-        	@SuppressWarnings("deprecation")
-			HttpClient client = new DefaultHttpClient();	
-        	 JSONObject load_project = new JSONObject();
-             load_project.put("projectName", container.getProjectName());
-             String url = "http://" + publicIP + ":"+agent_port+"/compile";
-             HttpPost post = new HttpPost(url);
-             StringEntity input;
-			try {
-				input = new StringEntity(load_project.toString());
-				 input.setContentType("application/json");
-	             post.setEntity(input);
-	             HttpResponse response_loadProject = client.execute(post);
-	             String responseString_loadProject = new BasicResponseHandler().handleResponse(response_loadProject);
-	             
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            
-        	}
-        	
-        	
-        };
+        JSONParser parser = new JSONParser();
+        Object obj = null;
+		try {
+			obj = parser.parse(responseString);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        JSONArray array = (JSONArray)obj;
         
-        t3.start();
-       
+      
         
-       */
 	    //persist the container object in mongo db
 		containerService.save(container);
 		
-
-		 return responseString;
-		
+        //System.out.println("Json string"+resp_obj.toJSONString());
+		 //return responseString;
+		return array;
 		
 		
     	
@@ -264,7 +247,7 @@ public class ContainerController {
     @RequestMapping(value="/getURL/{container_id}",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getURL(@PathVariable("container_id") Long container_id) {
+    public JSONObject getURL(@PathVariable("container_id") Long container_id) {
        
     	Container container = null;
 		try {
@@ -278,7 +261,9 @@ public class ContainerController {
 		
 		String url = "http://" + host + ":"+ port;
 
-    	return url;
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("url", url);
+    	return jsonObj;
     }
 	
 	
