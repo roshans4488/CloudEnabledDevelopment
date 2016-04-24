@@ -76,19 +76,37 @@ public class UserController {
 		amazonEC2Client = new AmazonEC2Client(credentials);
 		amazonEC2Client.setEndpoint("ec2.us-west-2.amazonaws.com"); 	
 		
+		try{
+			User userInDB = userService.findUserByName(user.getName());
+			System.out.println(userInDB.getName()+" exists.");
+			return userInDB;
+		}
+		catch (Exception e)
+		{
+			
+			
+			CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
+			createKeyPairRequest.withKeyName(user.getName());  //Keypair created with user name
+			CreateKeyPairResult createKeyPairResult =
+					  amazonEC2Client.createKeyPair(createKeyPairRequest);
+			
+			 String privateKey = createKeyPairResult.getKeyPair().getKeyMaterial();
+			
+			user.setPrivateKey(privateKey);
+			
+			
+			userService.save(user);
+			return user;
+			
+			
+			
+			
+			
+		}
 		
-		CreateKeyPairRequest createKeyPairRequest = new CreateKeyPairRequest();
-		createKeyPairRequest.withKeyName(user.getName());  //Keypair created with user name
-		CreateKeyPairResult createKeyPairResult =
-				  amazonEC2Client.createKeyPair(createKeyPairRequest);
-		
-		 String privateKey = createKeyPairResult.getKeyPair().getKeyMaterial();
-		
-		user.setPrivateKey(privateKey);
 		
 		
-		userService.save(user);
-		return user;
+		
 		
 		
     	
@@ -121,6 +139,25 @@ public class UserController {
     }
    
 	
+    
+  //Find User by name
+    @RequestMapping(value="/getUserByName/{username}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public User getUserByName(@PathVariable("username") String username) {
+       
+    	User user = null;
+		user = userService.findUserByName(username);
+
+    	return user;
+    }
+    
+    
+    
+    
+    
+    
+    
    //List all Users
     @RequestMapping(value="/getAllUsers",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd /agent/workspace
-tree -J $1
+tree -J -f $1

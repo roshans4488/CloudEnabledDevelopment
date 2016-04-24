@@ -61,5 +61,14 @@ public class UserRepositoryImpl extends BaseJpaRepository<User, Long> implements
 		
 		return entities;
 	}
+
+
+	@Override
+	public User findUserByName(String username) {
+		String queryStr="db.User.find({ 'name' : '"+username+"' })";
+		Query query=getEntityManager().createNativeQuery(queryStr,User.class);
+		User user=(User)query.getSingleResult();
+		return user;
+	}
 	
 }
