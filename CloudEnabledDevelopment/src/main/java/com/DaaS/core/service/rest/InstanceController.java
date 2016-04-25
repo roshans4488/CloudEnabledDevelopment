@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -56,6 +58,8 @@ import com.amazonaws.services.ec2.model.KeyPair;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.util.EC2MetadataUtils;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
@@ -427,6 +431,13 @@ public class InstanceController {
     public void deleteInstance(@PathVariable("instance_id") Long instance_id)  {
     	
     	try {
+    		
+    		
+    		TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+    		Collection<String> instanceIds = Arrays.asList(instanceService.getInstanceById(instance_id).getEc2InstanceId().toString());
+			terminateInstancesRequest.setInstanceIds(instanceIds);
+    		TerminateInstancesResult terminateInstancesResult = amazonEC2Client.terminateInstances(terminateInstancesRequest);
+
 			instanceService.deleteInstanceById(instance_id);
 		} catch (CloudDevException e) {
 			e.printStackTrace();
