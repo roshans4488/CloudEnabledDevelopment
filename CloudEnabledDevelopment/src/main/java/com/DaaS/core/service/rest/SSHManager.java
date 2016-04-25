@@ -145,6 +145,37 @@ public String sendCommand(String command)
    return outputBuffer.toString();
 }
 
+
+
+public String openStream()
+{
+   StringBuilder outputBuffer = new StringBuilder();
+
+   try
+   {
+      Channel channel = session.openChannel("shell");
+      channel.setInputStream(System.in);
+      channel.setOutputStream(System.out);
+      channel.connect();
+
+   }catch(Exception e){
+	   e.printStackTrace();
+   }
+   
+
+   return outputBuffer.toString();
+}
+
+
+
+
+
+
+
+
+
+
+
 public void close()
 {
    session.disconnect();

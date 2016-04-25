@@ -228,6 +228,54 @@ public class InstanceController {
 	}
 	
 	
+	//openStreamChannel
+	@RequestMapping(value="/openStreamChannel/{instance_id}",method = RequestMethod.POST, consumes =
+    	    "application/json" , produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+
+    public void openStreamChannel(@PathVariable("instance_id") Long instance_id) {
+     
+		
+		Instance instance = null;
+		try {
+			instance = instanceService.getInstanceById(instance_id);
+		} catch (CloudDevException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		//retrieve public IP
+		String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
+		
+		
+		//retrieve private key
+		User userObject = null;
+		try {
+			userObject = userService.getUserById(instance.getUser().getId());
+		} catch (CloudDevException e1) {
+			e1.printStackTrace();
+		}
+	    String privateKey = userObject.getPrivateKey();
+				
+			    
+			    
+			    
+    //create temp user.pem file
+    String name = userObject.getName();
+	SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change
+    sshManager.connect();
+    sshManager.openStream();
+    //System.out.println(response);
+	
+	
+	
+	
+	}
+	
+	
+	
+	
 	               //       /sync/2
 	@RequestMapping(value="/sync/{instance_id}",method = RequestMethod.POST, consumes =
     	    "application/json" , produces = "application/json")

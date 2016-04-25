@@ -12,7 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -98,7 +98,7 @@ public class ContainerController {
 		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); //"52.26.95.143";
 		String privateKey = userObject.getPrivateKey();
 		
-		//configuring port
+		//configuring port  db.getCollection('Container').find({'instanceId':5},{'_id':0,'userPort':1}).sort({userPort:-1}).limit(1).pretty()
 		Long agentPort = 8000L;
         Long containerCount = containerService.count(instance_id);
         agentPort+=containerCount;
@@ -301,14 +301,36 @@ public class ContainerController {
     
     //Delete a container
     @RequestMapping(value = "/deleteContainer/{container_id}",method = RequestMethod.DELETE, produces = "application/json")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public void deleteContainer(@PathVariable("container_id") Long container_id)  {
-    	
+    public JSONObject deleteContainer(@PathVariable("container_id") Long container_id)  {
+    	JSONObject response = new JSONObject();
     	try {
-    		containerService.deleteContainerById(container_id);
+    		
+    		 Container container = containerService.getContainerById(container_id);
+    		 String name = container.getInstance().getUser().getName();
+    		 String publicIP = container.getEc2ipAddress();
+    		 String privateKey = container.getInstance().getUser().getPrivateKey();
+    		 String dockerId = container.getDockerID();
+    				 
+    		String deleteContainer = "sudo docker rm -f "+dockerId;
+    		SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);
+            sshManager.connect();
+            String containerID = sshManager.sendCommand(deleteContainer);
+            
+            System.out.println("containerID:"+containerID);
+            containerService.deleteContainerById(container_id);
+    		
+            
+            response.put("containerId", containerID);
+    		return response;
+    		
+    		
+    		
+    		
 		} catch (CloudDevException e) {
-			e.printStackTrace();
+			response.put("containerId", e.getMessage());
+			return response;
 		}
     
     }
