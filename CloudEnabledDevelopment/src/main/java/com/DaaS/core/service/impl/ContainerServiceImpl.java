@@ -81,4 +81,9 @@ public class ContainerServiceImpl implements ContainerService{
 		return containerRepository.findAllForInstance(instance_id);
 	}
 
+	@Override
+	public Long getMaxAgentPort(Long instance_id) {
+		return containerRepository.findMaxAgentPort(instance_id);
+	}
+
 }

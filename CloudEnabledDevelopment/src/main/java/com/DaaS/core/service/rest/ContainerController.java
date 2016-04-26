@@ -98,9 +98,28 @@ public class ContainerController {
 		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); //"52.26.95.143";
 		String privateKey = userObject.getPrivateKey();
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		//configuring port  db.getCollection('Container').find({'instanceId':5},{'_id':0,'userPort':1}).sort({userPort:-1}).limit(1).pretty()
+		Instance instance = instanceService.getInstanceById(instance_id);
+		int containerCount = instance.getContainerCount()+1;
+		instance.setContainerCount(containerCount);
+		instanceService.save(instance);
+		
+		
+		
+		
+		
 		Long agentPort = 8000L;
-        Long containerCount = containerService.count(instance_id);
         agentPort+=containerCount;
         String agent_port = agentPort.toString();
         
@@ -322,6 +341,8 @@ public class ContainerController {
             containerService.deleteContainerById(container_id);
     		
             
+            
+            
             response.put("containerId", containerID);
     		return response;
     		
@@ -541,6 +562,22 @@ public class ContainerController {
        
 
     	return results;
+    	
+    	
+    }
+    
+    
+    
+    @RequestMapping(value="/getMaxAgentPort/{instance_id}",method = RequestMethod.GET,  produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Long getMaxAgentPort(@PathVariable("instance_id") Long instance_id) throws IOException, CloudDevException {
+        
+    	
+    	Long  result = containerService.getMaxAgentPort(instance_id);
+       
+
+    	return result;
     	
     	
     }

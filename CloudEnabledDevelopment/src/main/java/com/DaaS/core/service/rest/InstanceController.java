@@ -405,7 +405,8 @@ public class InstanceController {
   			
   			
   			System.out.println("InstanceId: "+instanceId);
-            instance.setEc2InstanceId(instanceId);		
+            instance.setEc2InstanceId(instanceId);	
+            instance.setContainerCount(0);
             instanceService.save(instance);
             
           

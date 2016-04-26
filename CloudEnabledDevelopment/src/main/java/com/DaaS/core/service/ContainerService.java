@@ -28,5 +28,7 @@ public interface ContainerService extends BaseService{
 	public int deleteAll();
 
 	public List<Container> findAllForInstance(Long instance_id);
+
+	public Long getMaxAgentPort(Long instance_id);
 	
 }

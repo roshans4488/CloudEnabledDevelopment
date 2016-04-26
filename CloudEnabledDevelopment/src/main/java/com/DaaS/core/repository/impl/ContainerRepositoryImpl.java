@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +67,20 @@ public class ContainerRepositoryImpl extends BaseJpaRepository<Container, Long> 
 		
 		return entities;
 	
+	}
+
+	@Override
+	public Long findMaxAgentPort(Long instance_id) {
+		/*String queryStr="db.Container.find({'instanceId':"+instance_id+"}).sort({'userPort':-1}).limit(1)";  //
+		Query query=getEntityManager().createNativeQuery(queryStr,Container.class);
+		Container result =(Container)query.getSingleResult();
+		
+		return Long.parseLong(result.getAgentPort().toString())  ;*/
+		
+		String queryStr="db.Container.count({ 'instanceId' : "+instance_id+" })";
+		Query query=getEntityManager().createNativeQuery(queryStr);
+		long count=(Long)query.getSingleResult();
+		return count;
 	}	
 	
 }

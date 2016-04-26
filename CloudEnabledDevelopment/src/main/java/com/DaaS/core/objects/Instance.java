@@ -41,9 +41,16 @@ public class Instance {
 	private String publicIp;
 	private String workspaceName;
 	private String workspaceType;
+	private int containerCount;
 	
 	
 	
+	public int getContainerCount() {
+		return containerCount;
+	}
+	public void setContainerCount(int containerCount) {
+		this.containerCount = containerCount;
+	}
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="userId")
 	private User user;

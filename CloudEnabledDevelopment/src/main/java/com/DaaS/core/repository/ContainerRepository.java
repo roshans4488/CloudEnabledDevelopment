@@ -10,4 +10,6 @@ public interface ContainerRepository extends  BaseRepository<Container,Long>{
 
 	List<Container> findAllForInstance(Long instance_id);
 
+	Long findMaxAgentPort(Long instance_id);
+
 }
