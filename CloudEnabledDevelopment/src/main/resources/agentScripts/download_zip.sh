@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cd /agent/workspace
-cd $2
+cd /agent/workspace/$2
+
 
 if [ "$1" == "1" ]
 then

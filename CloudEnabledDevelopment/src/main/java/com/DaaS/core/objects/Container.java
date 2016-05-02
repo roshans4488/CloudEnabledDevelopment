@@ -34,12 +34,15 @@ public class Container {
 	private String agentPort;
 	private String ttyPort;
 	private String userPort;
+	private String ncPort;
 	
 
 
 	
 
 	
+
+
 
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="instanceId")
@@ -166,5 +169,13 @@ public class Container {
 
 	public void setUserPort(String userPort) {
 		this.userPort = userPort;
+	}
+	
+	public String getNcPort() {
+		return ncPort;
+	}
+
+	public void setNcPort(String ncPort) {
+		this.ncPort = ncPort;
 	}
 }

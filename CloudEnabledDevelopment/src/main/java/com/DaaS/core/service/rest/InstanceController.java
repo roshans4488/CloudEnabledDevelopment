@@ -37,9 +37,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.DaaS.core.objects.CloudEnabledDevelopmentApplication;
+import com.DaaS.core.objects.Container;
 import com.DaaS.core.objects.Instance;
 import com.DaaS.core.objects.User;
 import com.DaaS.core.service.CloudDevException;
+import com.DaaS.core.service.ContainerService;
 import com.DaaS.core.service.InstanceService;
 import com.DaaS.core.service.UserService;
 import com.amazonaws.auth.AWSCredentials;
@@ -83,6 +85,8 @@ public class InstanceController {
 	private InstanceService instanceService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ContainerService containerService;
 	private AWSCredentials credentials;
 	private AmazonEC2Client amazonEC2Client;
 	
@@ -229,25 +233,28 @@ public class InstanceController {
 	
 	
 	//openStreamChannel
-	@RequestMapping(value="/openStreamChannel/{instance_id}",method = RequestMethod.POST, consumes =
+	@RequestMapping(value="/openStreamChannel/{container_id}",method = RequestMethod.POST, consumes =
     	    "application/json" , produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public void openStreamChannel(@PathVariable("instance_id") Long instance_id) {
+    public void openStreamChannel(@PathVariable("container_id") Long container_id) throws CloudDevException {
      
 		
+		Container container = containerService.getContainerById(container_id);
+		Instance instance = container.getInstance();
+		
+		/*
 		Instance instance = null;
 		try {
 			instance = instanceService.getInstanceById(instance_id);
 		} catch (CloudDevException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
-		}
+		}*/
 		
 		//retrieve public IP
 		String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
-		
 		
 		//retrieve private key
 		User userObject = null;
@@ -259,15 +266,17 @@ public class InstanceController {
 	    String privateKey = userObject.getPrivateKey();
 				
 			    
-			    
-			    
+	String dockerId = container.getDockerID();
+	System.out.println("DOCKER_ID:"+dockerId);
     //create temp user.pem file
     String name = userObject.getName();
 	SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change
     sshManager.connect();
-    sshManager.openStream();
+   // sshManager.openStream("baf6dc5824e9676984e646167722e11e392b4baeac760a5766ea1f7c918c403b");
+    
+    sshManager.openStream( dockerId.replaceAll("\\n", ""));
+   
     //System.out.println(response);
-	
 	
 	
 	

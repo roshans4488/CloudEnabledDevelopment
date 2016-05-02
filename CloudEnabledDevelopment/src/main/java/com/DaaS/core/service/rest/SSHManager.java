@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -147,7 +149,7 @@ public String sendCommand(String command)
 
 
 
-public String openStream()
+public String openStream(String dockerId)
 {
    StringBuilder outputBuffer = new StringBuilder();
 
@@ -155,8 +157,20 @@ public String openStream()
    {
       Channel channel = session.openChannel("shell");
       channel.setInputStream(System.in);
-      channel.setOutputStream(System.out);
+     // channel.setOutputStream(System.out);
+      
+      OutputStream inputstream_for_the_channel = channel.getOutputStream();
+      PrintStream commander = new PrintStream(inputstream_for_the_channel, true);
+
+      channel.setOutputStream(System.out, true);
+
       channel.connect();
+      
+      
+      //String dockerId = "baf6dc5824e9";
+      commander.println("sudo docker exec "+dockerId+"  /bin/sh -c \"nohup tail -F /agent/logs/spring_execute.log|nc -lp 7777 &\"");    
+      //commander.println("cd folder");
+      commander.close();
 
    }catch(Exception e){
 	   e.printStackTrace();

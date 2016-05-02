@@ -132,11 +132,13 @@ public class ContainerController {
         userPort+=containerCount;
         String user_port = userPort.toString();
         
-        
+        Long ncPort = 6000L;
+        ncPort+=containerCount;
+        String nc_port = ncPort.toString();
         
 		
 		//create container on ec2 instance
-        String createContainer = "/home/ubuntu/scripts/createContainer.sh " + agent_port + " " + tty_port + " " + user_port;
+        String createContainer = "/home/ubuntu/scripts/createContainer.sh " + agent_port + " " + tty_port + " " + user_port+ " " + nc_port;
         SSHManager sshManager = new SSHManager(userObject.getName(),publicIP,privateKey,22);
         sshManager.connect();
         String containerID = sshManager.sendCommand(createContainer);
@@ -148,7 +150,7 @@ public class ContainerController {
         container.setAgentPort(agent_port);
         container.setTtyPort(tty_port);
         container.setUserPort(user_port);
-        
+        container.setNcPort(nc_port);
         
         //copy Agent jar file
         String copyAgentJar = "/home/ubuntu/scripts/copyfile.sh " + containerID;
@@ -550,6 +552,41 @@ public class ContainerController {
     }
     
 
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
     
 	 //get Containers for Instance
     @RequestMapping(value="/getContainersForInstance/{instance_id}",method = RequestMethod.GET,  produces = "application/json")
