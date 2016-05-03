@@ -238,7 +238,7 @@ public class InstanceController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public void openStreamChannel(@PathVariable("container_id") Long container_id) throws CloudDevException {
+    public JSONObject openStreamChannel(@PathVariable("container_id") Long container_id) throws CloudDevException {
      
 		
 		Container container = containerService.getContainerById(container_id);
@@ -278,7 +278,10 @@ public class InstanceController {
    
     //System.out.println(response);
 	
-	
+
+	   JSONObject data_file = new JSONObject();
+       data_file.put("status", "success");
+       return data_file;
 	
 	}
 	
