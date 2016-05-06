@@ -238,7 +238,7 @@ public class InstanceController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public JSONObject openStreamChannel(@PathVariable("container_id") Long container_id, JSONObject obj) throws CloudDevException {
+    public JSONObject openStreamChannel(@RequestBody JSONObject obj, @PathVariable("container_id") Long container_id ) throws CloudDevException {
      
 		
 		String goal = obj.get("goal").toString();
