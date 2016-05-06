@@ -149,7 +149,7 @@ public String sendCommand(String command)
 
 
 
-public String openStream(String dockerId)
+public String openStream(String dockerId, String goal)
 {
    StringBuilder outputBuffer = new StringBuilder();
 
@@ -166,9 +166,15 @@ public String openStream(String dockerId)
 
       channel.connect();
       
+      String logFile;
       
+      if(goal.equalsIgnoreCase("execute")){
+    	  logFile = "/agent/logs/*_execute.log";
+      }else
+    	  logFile = "/agent/logs/*_compile.log";
+    	  
       //String dockerId = "baf6dc5824e9";
-      commander.println("sudo docker exec "+dockerId+"  /bin/sh -c \"nohup tail -F /agent/logs/spring_execute.log|nc -lp 7777 &\"");    
+      commander.println("sudo docker exec "+dockerId+"  /bin/sh -c \"nohup tail -F "+ logFile +"|nc -lp 7777 &\"");    
       //commander.println("cd folder");
       commander.close();
 

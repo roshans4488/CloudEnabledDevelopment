@@ -238,8 +238,10 @@ public class InstanceController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public JSONObject openStreamChannel(@PathVariable("container_id") Long container_id) throws CloudDevException {
+    public JSONObject openStreamChannel(@PathVariable("container_id") Long container_id, JSONObject obj) throws CloudDevException {
      
+		
+		String goal = obj.get("goal").toString();
 		
 		Container container = containerService.getContainerById(container_id);
 		Instance instance = container.getInstance();
@@ -274,7 +276,7 @@ public class InstanceController {
     sshManager.connect();
    // sshManager.openStream("baf6dc5824e9676984e646167722e11e392b4baeac760a5766ea1f7c918c403b");
     
-    sshManager.openStream( dockerId.replaceAll("\\n", ""));
+    sshManager.openStream( dockerId.replaceAll("\\n", ""), goal);
    
     //System.out.println(response);
 	
