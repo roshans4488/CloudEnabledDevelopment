@@ -131,6 +131,11 @@
 			      <groupId>org.hibernate.javax.persistence</groupId>
 			      <artifactId>hibernate-jpa-2.0-api</artifactId>
 			    </exclusion>
+		        <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		        </exclusion>
+			    
 			</exclusions>
         </dependency>
 		
@@ -165,6 +170,12 @@
 		    <groupId>org.jboss.logging</groupId>
 		    <artifactId>jboss-logging</artifactId>
 		    <version>3.3.0.Final</version>
+		    <exclusions>
+		        <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		        </exclusion>
+		    </exclusions>
 		</dependency>
 		
 		<dependency>
@@ -183,8 +194,12 @@
 			      <groupId>org.hibernate.javax.persistence</groupId>
 			      <artifactId>hibernate-jpa-2.0-api</artifactId>
 			    </exclusion>
+			     <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		        </exclusion>
 			</exclusions>
-			
+       
 			
 		</dependency>
 		
@@ -197,6 +212,12 @@
 			      <groupId>org.hibernate.javax.persistence</groupId>
 			      <artifactId>hibernate-jpa-2.0-api</artifactId>
 			    </exclusion>
+			    
+			     <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		        </exclusion>
+			    
 			</exclusions>
 			
 		</dependency>
@@ -263,7 +284,10 @@
 			      <artifactId>hibernate-jpa-2.0-api</artifactId>
 			    </exclusion>
 				
-				
+				 <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		        </exclusion>
 				
 			</exclusions>
 			</dependency>
