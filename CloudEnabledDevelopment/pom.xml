@@ -36,6 +36,23 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+      <!-- Build an executable JAR -->
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>2.4</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <addClasspath>true</addClasspath>
+            <classpathPrefix>lib/</classpathPrefix>
+            <mainClass>com.DaaS.core.objects.CloudEnabledDevelopmentApplication</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+    </plugin>
+			
 		</plugins>
 	</build>
 	<name>CloudEnabledDevelopment</name>
@@ -89,12 +106,12 @@
 		</dependency>
 		
 		
-		
+		<!-- 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		
+		 -->
 		
 		 <dependency>
             <groupId>org.springframework.boot</groupId>
