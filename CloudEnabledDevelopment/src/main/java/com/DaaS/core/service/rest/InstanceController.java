@@ -55,6 +55,8 @@ import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
 import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
 import com.amazonaws.services.ec2.model.IpPermission;
 import com.amazonaws.services.ec2.model.KeyPair;
 import com.amazonaws.services.ec2.model.Reservation;
@@ -379,9 +381,21 @@ public class InstanceController {
 	}
 	
 	
-	
-	
-	
+	@RequestMapping(value="/getSecurityGroup",method = RequestMethod.POST, consumes =
+    	    "application/json" , produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+
+    public String getSecurityGroup() {
+		
+		 DescribeSecurityGroupsRequest securityRequest = new DescribeSecurityGroupsRequest(); 
+	      securityRequest.setGroupNames(Arrays.asList("CloudDevSecurityGroup")); 
+	      DescribeSecurityGroupsResult securityDescription = amazonEC2Client.describeSecurityGroups(securityRequest); 
+	     String  securityGroup = securityDescription.getSecurityGroups().get(0).toString();
+	     
+	     return securityGroup;
+	      
+	}
 	
 	
 	
@@ -394,12 +408,22 @@ public class InstanceController {
     @ResponseBody
 
     public Instance createInstance(@RequestBody @Valid Instance instance) {
+		
+		
+		
+
+      DescribeSecurityGroupsRequest securityRequest = new DescribeSecurityGroupsRequest(); 
+      securityRequest.setGroupNames(Arrays.asList("CloudDevSecurityGroup")); 
+      DescribeSecurityGroupsResult securityDescription = amazonEC2Client.describeSecurityGroups(securityRequest); 
+      System.out.println(securityDescription.getSecurityGroups().get(0));
+      
+
      
     	try {
     		
     		
     		
-    		
+    																																																																																																																																																																																																																																																																																																		
     		RunInstancesRequest runInstancesRequest =
   			      new RunInstancesRequest();
 

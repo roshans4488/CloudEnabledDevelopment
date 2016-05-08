@@ -94,10 +94,9 @@ public class UserController {
 			
 			user.setPrivateKey(privateKey);
 			
+			User generatedUser = userService.save(user);
 			
-			userService.save(user);
-			return user;
-			
+			return generatedUser;
 			
 			
 			
@@ -105,11 +104,6 @@ public class UserController {
 		}
 		
 		
-		
-		
-		
-		
-    	
     	
     	
     }

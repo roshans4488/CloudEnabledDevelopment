@@ -26,8 +26,8 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	@Transactional
-	public void save(User entity) throws CloudDevException {
-		userRepository.save(entity);
+	public User save(User entity) throws CloudDevException {
+		return userRepository.save(entity);
 		
 	}
 

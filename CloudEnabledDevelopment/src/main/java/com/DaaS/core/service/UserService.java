@@ -8,7 +8,7 @@ import com.DaaS.core.objects.User;
 public interface UserService extends BaseService {
 
 	
-public void save(User  entity) throws CloudDevException;
+public User save(User  entity) throws CloudDevException;
 	
 	public void saveUpdate(User  entity) throws CloudDevException;
 	
