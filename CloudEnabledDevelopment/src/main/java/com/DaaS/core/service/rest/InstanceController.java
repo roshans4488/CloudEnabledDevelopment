@@ -159,13 +159,13 @@ public class InstanceController {
 	
 	
 	
-	@RequestMapping(value="/createSecurityGroup",method = RequestMethod.GET,  produces = "application/json")
+	@RequestMapping(value="/createSecurityGroup/{securityGroup}",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String createSecurityGroup() throws IOException, CloudDevException {
+    public String createSecurityGroup(@PathVariable("securityGroup") String securityGroup) throws IOException, CloudDevException {
 		
 		CreateSecurityGroupRequest csgr = new CreateSecurityGroupRequest();
-		csgr.withGroupName("CloudDevSecurityGroup").withDescription("Cloud Dev security group");
+		csgr.withGroupName(securityGroup).withDescription(securityGroup);
 		
 		
 		CreateSecurityGroupResult createSecurityGroupResult =
@@ -175,25 +175,25 @@ public class InstanceController {
 		IpPermission ipPermission1 =
 			    new IpPermission();
 
-			ipPermission1.withIpRanges("0.0.0.0/32")
-			            .withIpProtocol("tcp")
-			            .withFromPort(22)
-			            .withToPort(22);
+			ipPermission1.withIpRanges("0.0.0.0/0")
+			            .withIpProtocol("-1")
+			           .withFromPort(-1)
+			            .withToPort(-1);
 			
-			IpPermission ipPermission2 =
+		/*	IpPermission ipPermission2 =
 				    new IpPermission();
 
 				ipPermission2.withIpRanges("0.0.0.0/0")
 				            .withIpProtocol("icmp")
 							.withFromPort(8)  //The from_port is the ICMP type number and the to_port is the ICMP code
-							.withToPort(0);
+							.withToPort(0);*/
 				            
 			
 			AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest =
 				    new AuthorizeSecurityGroupIngressRequest();
 
-				authorizeSecurityGroupIngressRequest.withGroupName("CloudDevSecurityGroup")
-				                                    .withIpPermissions(ipPermission1,ipPermission2);
+				authorizeSecurityGroupIngressRequest.withGroupName(securityGroup)
+				                                    .withIpPermissions(ipPermission1);
 		
 				
 		amazonEC2Client.authorizeSecurityGroupIngress(authorizeSecurityGroupIngressRequest);
@@ -396,6 +396,9 @@ public class InstanceController {
     public Instance createInstance(@RequestBody @Valid Instance instance) {
      
     	try {
+    		
+    		
+    		
     		
     		RunInstancesRequest runInstancesRequest =
   			      new RunInstancesRequest();
