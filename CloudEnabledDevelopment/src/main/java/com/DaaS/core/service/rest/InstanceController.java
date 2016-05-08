@@ -294,9 +294,8 @@ public class InstanceController {
 	
 	
 	//checkHealth
-	@RequestMapping(value="/checkHealth/{instance_id}",method = RequestMethod.GET, consumes =
-    	    "application/json" , produces = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+	@RequestMapping(value="/checkHealth/{instance_id}",method = RequestMethod.GET , produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
 
     public JSONObject checkHealth(@PathVariable("instance_id") Long instance_id) {
@@ -306,16 +305,8 @@ public class InstanceController {
 		try {
 			instance = instanceService.getInstanceById(instance_id);
 		} catch (CloudDevException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
-		
-		
-		
-		
-		
-		
 		
 		
 		//retrieve private key
@@ -351,7 +342,7 @@ public class InstanceController {
 		status = "Down";
 	}
 	JSONObject obj = new JSONObject();
-    obj.put("Instance state",status);
+    obj.put("InstanceState",status);
     
     return obj;
     
