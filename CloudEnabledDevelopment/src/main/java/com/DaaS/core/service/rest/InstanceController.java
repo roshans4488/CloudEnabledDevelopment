@@ -63,6 +63,10 @@ import com.amazonaws.services.ec2.model.KeyPair;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StartInstancesResult;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.util.EC2MetadataUtils;
@@ -623,6 +627,110 @@ public class InstanceController {
     	
     	
     }
+    
+    //stop instance
+    @RequestMapping(value = "/stopInstance/{instance_id}",method = RequestMethod.POST, produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+  
+    public JSONObject stopInstance(@PathVariable("instance_id") Long instance_id)  {
+    	
+    	try {
+    		
+    		Instance instance = null;
+    		try {
+    			instance = instanceService.getInstanceById(instance_id);
+    		} catch (CloudDevException e2) {
+    			e2.printStackTrace();
+    		}
+    		
+    		User userObject = null;
+    		try {
+    			userObject = userService.getUserById(instance.getUser().getId());
+    		} catch (CloudDevException e1) {
+    			e1.printStackTrace();
+    		}
+    		
+    	    try {
+    			amazonEC2Client = authenticateAWSUser(userObject.getId());
+    		} catch (IOException | CloudDevException e1) {
+    			e1.printStackTrace();
+    		}
+    		
+    		
+    		
+    		
+    		
+    		StopInstancesRequest stopInstancesRequest = new StopInstancesRequest();
+    		Collection<String> instanceIds = Arrays.asList(instanceService.getInstanceById(instance_id).getEc2InstanceId().toString());
+    		stopInstancesRequest.setInstanceIds(instanceIds);
+			StopInstancesResult stopInstancesResult = amazonEC2Client.stopInstances(stopInstancesRequest);
+
+		} catch (CloudDevException e) {
+			e.printStackTrace();
+		}
+    
+    	
+    	JSONObject result = new JSONObject();
+    	result.put("Status","Stopping");
+		
+		return result;
+    }
+    
+   
+    
+    //start instance
+    @RequestMapping(value = "/startInstance/{instance_id}",method = RequestMethod.POST, produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public JSONObject startInstance(@PathVariable("instance_id") Long instance_id)  {
+    	
+    	try {
+    		
+    		
+    		Instance instance = null;
+    		try {
+    			instance = instanceService.getInstanceById(instance_id);
+    		} catch (CloudDevException e2) {
+    			e2.printStackTrace();
+    		}
+    		
+    		User userObject = null;
+    		try {
+    			userObject = userService.getUserById(instance.getUser().getId());
+    		} catch (CloudDevException e1) {
+    			e1.printStackTrace();
+    		}
+    		
+    	    try {
+    			amazonEC2Client = authenticateAWSUser(userObject.getId());
+    		} catch (IOException | CloudDevException e1) {
+    			e1.printStackTrace();
+    		}
+    		
+    		
+    		
+    		
+    		
+    		StartInstancesRequest startInstancesRequest = new StartInstancesRequest();
+    		Collection<String> instanceIds = Arrays.asList(instanceService.getInstanceById(instance_id).getEc2InstanceId().toString());
+    		startInstancesRequest.setInstanceIds(instanceIds);
+			StartInstancesResult stopInstancesResult = amazonEC2Client.startInstances(startInstancesRequest);
+
+		} catch (CloudDevException e) {
+			e.printStackTrace();
+		}
+    	
+    	
+    	JSONObject result = new JSONObject();
+    	result.put("Status","Starting");
+		
+		return result;
+    	
+    
+    }
+    
+    
     
     
     
