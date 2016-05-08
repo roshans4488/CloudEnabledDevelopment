@@ -33,8 +33,8 @@ public class InstanceServiceImpl implements InstanceService{
 	
 	@Override
 	@Transactional
-	public void save(Instance entity) throws CloudDevException {
-		instanceRepository.save(entity);
+	public Instance  save(Instance entity) throws CloudDevException {
+		return instanceRepository.save(entity);
 	}
 
 	@Override

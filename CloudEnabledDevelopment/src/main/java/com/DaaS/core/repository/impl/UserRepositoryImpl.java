@@ -51,8 +51,8 @@ public class UserRepositoryImpl extends BaseJpaRepository<User, Long> implements
 
 
 	@Override
-	public List<User> findAllAccountsByUserId(Long user_id) {
-		String queryStr="db.User.find({'userId':"+user_id+"})"; 
+	public List<User> findAllAccountsByUserId(String user_id) {
+		String queryStr="db.User.find({'userId':\""+user_id+"\""+"})"; 
 		System.out.println(queryStr);
 		Query query=getEntityManager().createNativeQuery(queryStr,User.class);
 		

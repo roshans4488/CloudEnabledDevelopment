@@ -26,7 +26,7 @@ public User save(User  entity) throws CloudDevException;
 
 	public int deleteAll();
 
-	public List<User> findAllAccountsByUserId(Long user_id);
+	public List<User> findAllAccountsByUserId(String user_id);
 
 	public User findUserByName(String username);
 }

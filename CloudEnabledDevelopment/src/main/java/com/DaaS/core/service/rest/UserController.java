@@ -171,7 +171,7 @@ public class UserController {
     @RequestMapping(value="/getAllAccountsByUserId/{user_id}",method = RequestMethod.GET,  produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<User> getAllAccountsByUserId(@PathVariable("user_id") Long user_id) throws IOException, CloudDevException {
+    public List<User> getAllAccountsByUserId(@PathVariable("user_id") String user_id) throws IOException, CloudDevException {
         
     	
     	List<User>  results = userService.findAllAccountsByUserId(user_id);

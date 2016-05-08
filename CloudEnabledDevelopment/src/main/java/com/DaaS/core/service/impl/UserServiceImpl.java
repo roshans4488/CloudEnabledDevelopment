@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService{
 	}
 
 	@Override
-	public List<User> findAllAccountsByUserId(Long user_id) {
+	public List<User> findAllAccountsByUserId(String user_id) {
 		return userRepository.findAllAccountsByUserId(user_id);
 	}
 

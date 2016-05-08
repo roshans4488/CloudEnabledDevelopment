@@ -15,7 +15,7 @@ import com.DaaS.core.objects.Instance;
 public interface InstanceService extends BaseService {
 
 	
-	public void save(Instance  entity) throws CloudDevException;
+	public Instance save(Instance  entity) throws CloudDevException;
 	
 	public void saveUpdate(Instance  entity) throws CloudDevException;
 	

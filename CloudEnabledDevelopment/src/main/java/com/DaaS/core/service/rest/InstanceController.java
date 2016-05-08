@@ -381,17 +381,17 @@ public class InstanceController {
 	}
 	
 	
-	@RequestMapping(value="/getSecurityGroup",method = RequestMethod.POST, consumes =
+	@RequestMapping(value="/getSecurityGroup/{securityGroupParam}",method = RequestMethod.POST, consumes =
     	    "application/json" , produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
 
-    public String getSecurityGroup() {
+    public String getSecurityGroup(@PathVariable("securityGroupParam") String securityGroupParam) {
 		
 		 DescribeSecurityGroupsRequest securityRequest = new DescribeSecurityGroupsRequest(); 
-	      securityRequest.setGroupNames(Arrays.asList("CloudDevSecurityGroup")); 
+	      securityRequest.setGroupNames(Arrays.asList(securityGroupParam)); 
 	      DescribeSecurityGroupsResult securityDescription = amazonEC2Client.describeSecurityGroups(securityRequest); 
-	     String  securityGroup = securityDescription.getSecurityGroups().get(0).toString();
+	     String  securityGroup = securityDescription.getSecurityGroups().get(0).getGroupName().toString();
 	     
 	     return securityGroup;
 	      
@@ -410,15 +410,33 @@ public class InstanceController {
     public Instance createInstance(@RequestBody @Valid Instance instance) {
 		
 		
-		
-
-      DescribeSecurityGroupsRequest securityRequest = new DescribeSecurityGroupsRequest(); 
-      securityRequest.setGroupNames(Arrays.asList("CloudDevSecurityGroup")); 
-      DescribeSecurityGroupsResult securityDescription = amazonEC2Client.describeSecurityGroups(securityRequest); 
-      System.out.println(securityDescription.getSecurityGroups().get(0));
-      
-
+		String securityGroup ="";
+     try{
+    	 securityGroup = getSecurityGroup("CloudDevSecurityGroup");
+     }
      
+     catch(Exception e)
+     {
+    	 
+    	 try {
+    		 securityGroup = createSecurityGroup("CloudDevSecurityGroup");
+		} catch (IOException | CloudDevException e1) {
+			e1.printStackTrace();
+		}
+     }
+    
+     
+     System.out.println("securityGroup"+securityGroup);
+     /*
+     if(!securityGroup.contentEquals("CloudDevSecurityGroup"))
+     {
+		try {
+			createSecurityGroup("CloudDevSecurityGroup");
+		} catch (IOException | CloudDevException e1) {
+			e1.printStackTrace();
+			}
+     }*/
+      Instance createdInstance = null;
     	try {
     		
     		
@@ -432,7 +450,7 @@ public class InstanceController {
   			                     .withMinCount(instance.getMinCount())
   			                     .withMaxCount(instance.getMaxCount())
   			                     .withKeyName(instance.getKeyName())
-  			                     .withSecurityGroups(instance.getSecurityGroup());
+  			                     .withSecurityGroups(securityGroup);
   			  
   			  
   			  
@@ -448,7 +466,7 @@ public class InstanceController {
   			System.out.println("InstanceId: "+instanceId);
             instance.setEc2InstanceId(instanceId);	
             instance.setContainerCount(0);
-            instanceService.save(instance);
+            createdInstance = instanceService.save(instance);
             
           
     		
@@ -458,7 +476,7 @@ public class InstanceController {
         
     	
     	
-        return instance;
+        return createdInstance;
     }   
 	
 	
