@@ -312,8 +312,10 @@ public class InstanceController {
 		
 		
 		
-		//retrieve public IP
-		String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
+		
+		
+		
+		
 		
 		
 		//retrieve private key
@@ -327,6 +329,14 @@ public class InstanceController {
 		
 	    String name = userObject.getName();
 	
+	    try {
+			amazonEC2Client = authenticateAWSUser(userObject.getId());
+		} catch (IOException | CloudDevException e1) {
+			e1.printStackTrace();
+		}
+	  //retrieve public IP
+	   String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
+	    
 	SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change
     String status="";
 	try
