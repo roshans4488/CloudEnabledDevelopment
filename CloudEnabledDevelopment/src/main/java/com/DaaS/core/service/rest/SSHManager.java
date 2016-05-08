@@ -36,6 +36,70 @@ public SSHManager(String user,String connectionIP, String privateKey, int port)
 }
 
 
+
+public String quickConnect() throws JSchException
+{
+   String errorMessage = null;
+   File file = null;
+   /*
+  
+
+   */
+   try {
+	   try {
+		   file = new File(user+".pem");
+		   
+		   if(!file.exists()){
+					file.createNewFile();
+					 FileWriter fileWritter = new FileWriter(file.getName(),true);
+					   BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+					   bufferWritter.write(privateKey);
+					   bufferWritter.close();
+				}
+		   file.deleteOnExit();
+		  
+		    
+		} catch (IOException e) {
+		}
+	   
+	   
+	
+	   
+	jsch.addIdentity(file.getCanonicalPath());
+	
+} catch (JSchException e) {
+		e.printStackTrace();
+} catch (IOException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
+
+  
+  	 
+	 session = jsch.getSession("ubuntu", connectionIP, port);
+	 //session.setHost(connectionIP);
+	
+	 session.setConfig("StrictHostKeyChecking", "no");
+	 session.connect(5000);
+	 System.out.println("session created.");
+     
+
+
+   return errorMessage;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 public String connect()
 {
    String errorMessage = null;

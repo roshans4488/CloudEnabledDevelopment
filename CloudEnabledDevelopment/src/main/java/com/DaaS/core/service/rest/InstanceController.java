@@ -20,6 +20,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,6 +293,60 @@ public class InstanceController {
 	
 	
 	
+	//checkHealth
+	@RequestMapping(value="/checkHealth/{instance_id}",method = RequestMethod.GET, consumes =
+    	    "application/json" , produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+
+    public JSONObject checkHealth(@PathVariable("instance_id") Long instance_id) {
+     
+		
+		Instance instance = null;
+		try {
+			instance = instanceService.getInstanceById(instance_id);
+		} catch (CloudDevException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		
+		
+		//retrieve public IP
+		String publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ;   
+		
+		
+		//retrieve private key
+		User userObject = null;
+		try {
+			userObject = userService.getUserById(instance.getUser().getId());
+		} catch (CloudDevException e1) {
+			e1.printStackTrace();
+		}
+	    String privateKey = userObject.getPrivateKey();
+		
+	    String name = userObject.getName();
+	
+	SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);  //change
+    String status="";
+	try
+	{
+		sshManager.quickConnect();
+		status = "Up";
+				
+	}
+	catch(Exception e)
+	{
+		
+		status = "Down";
+	}
+	JSONObject obj = new JSONObject();
+    obj.put("Instance state",status);
+    
+    return obj;
+    
+	}
+	
 	               //       /sync/2
 	@RequestMapping(value="/sync/{instance_id}",method = RequestMethod.POST, consumes =
     	    "application/json" , produces = "application/json")
@@ -409,15 +464,16 @@ public class InstanceController {
 
     public Instance createInstance(@RequestBody @Valid Instance instance) {
 		
-		
-		String securityGroup ="";
+	//Configuring security group	
+	String securityGroup ="";
      try{
+    	 //check if security group already exists
     	 securityGroup = getSecurityGroup("CloudDevSecurityGroup");
      }
      
      catch(Exception e)
      {
-    	 
+    	 //if not create a new one
     	 try {
     		 securityGroup = createSecurityGroup("CloudDevSecurityGroup");
 		} catch (IOException | CloudDevException e1) {
@@ -425,23 +481,13 @@ public class InstanceController {
 		}
      }
     
-     
-     System.out.println("securityGroup"+securityGroup);
-     /*
-     if(!securityGroup.contentEquals("CloudDevSecurityGroup"))
-     {
-		try {
-			createSecurityGroup("CloudDevSecurityGroup");
-		} catch (IOException | CloudDevException e1) {
-			e1.printStackTrace();
-			}
-     }*/
+     //Creating new EC2 instance in AWS
       Instance createdInstance = null;
     	try {
     		
     		
     		
-    																																																																																																																																																																																																																																																																																																		
+    		//preparing the request																																																																																																																																																																																																																																																																																																
     		RunInstancesRequest runInstancesRequest =
   			      new RunInstancesRequest();
 
@@ -453,22 +499,71 @@ public class InstanceController {
   			                     .withSecurityGroups(securityGroup);
   			  
   			  
-  			  
+  			  //sending the request to start instance
   			  RunInstancesResult runInstancesResult =
   				      amazonEC2Client.runInstances(runInstancesRequest);
     		
   			  
-  			//Thread.sleep(60000);
-  			  
+  			//persisting instance record in mongodb  
   			String instanceId = runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
-  			
-  			
   			System.out.println("InstanceId: "+instanceId);
             instance.setEc2InstanceId(instanceId);	
             instance.setContainerCount(0);
             createdInstance = instanceService.save(instance);
+            Long createdInstanceId = createdInstance.getInstanceId();
             
-          
+            
+            //starting the long running sync process asynchronously in thread
+            Thread t = new Thread(){
+            	public void run(){
+            		int count = 0;
+                    int maxTries = 20;
+                    String publicIP = "";
+                    
+                    
+                  //retrieve private key and name
+            		User userObject = null;
+            		try {
+            			userObject = userService.getUserById(instance.getUser().getId());
+            		} catch (CloudDevException e1) {
+            			e1.printStackTrace();
+            		}
+            	    String privateKey = userObject.getPrivateKey();
+            	    String name = userObject.getName();
+                    
+                    
+                    try{
+                    //checking if system is up before starting sync	
+                    while(true) {
+                        try {
+                            Thread.sleep(6000);
+                            
+                            publicIP = Yoda.getPublicIp(instance.getEc2InstanceId(), amazonEC2Client) ; 
+                            SSHManager sshManager = new SSHManager(name,publicIP,privateKey,22);
+                            sshManager.quickConnect();
+                            
+                            
+                            //start syncing
+                            System.out.println("Begin syncing...");
+                            sync(createdInstanceId);
+                            break;
+                        } catch (Exception e) {
+                        	
+                            if (++count == maxTries) throw e;
+                            System.out.println("Retrying connection to EC2 instance "+publicIP+".Count:"+count);
+                        }
+                    }
+                    }
+                    catch (InterruptedException | JSchException e1) {
+            			e1.printStackTrace();
+            		}
+            	}
+            };
+            
+            t.start();
+            
+            
+            
     		
 		} catch (CloudDevException e) {
 			e.printStackTrace();
