@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -70,6 +71,11 @@ public class ContainerController {
 	
 	private AmazonEC2Client amazonEC2Client;
 	
+	
+	
+	
+	
+	
 	//create Container     /createContainer/1  (MongoId of instance)
 	@RequestMapping(value="/createContainer/{instance_id}",method = RequestMethod.POST,consumes = "application/json",  produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
@@ -95,7 +101,7 @@ public class ContainerController {
 		
 		
 		//get publicIP and private key
-		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); //"52.26.95.143";
+		String publicIP = Yoda.getPublicIp(instanceService.getInstanceById(instance_id).getEc2InstanceId(), amazonEC2Client); 
 		String privateKey = userObject.getPrivateKey();
 		
 		
