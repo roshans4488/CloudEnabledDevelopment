@@ -629,8 +629,8 @@ public class InstanceController {
     }
     
     //stop instance
-    @RequestMapping(value = "/stopInstance/{instance_id}",method = RequestMethod.POST, produces = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value = "/stopInstance/{instance_id}",method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
   
     public JSONObject stopInstance(@PathVariable("instance_id") Long instance_id)  {
@@ -680,8 +680,8 @@ public class InstanceController {
    
     
     //start instance
-    @RequestMapping(value = "/startInstance/{instance_id}",method = RequestMethod.POST, produces = "application/json")
-    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(value = "/startInstance/{instance_id}",method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public JSONObject startInstance(@PathVariable("instance_id") Long instance_id)  {
     	
